@@ -44,7 +44,11 @@ const data = [
 ];
 
 const setup = {
-    columnHeaderNames: [],
+    columnHeaderNames: [
+        { columnName: 'id' },
+        { columnName: 'name' },
+        { columnName: 'age' }
+    ],
     contextMenuOptions: [
         {
             actionName: "Edit",
