@@ -20,7 +20,7 @@ First, include the `opengridjs.js` and `opengridjs.css` files in your HTML file.
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Opengrid.js Example</title>
+    <title>Opengridjs Example</title>
     <link rel="stylesheet" href="opengridjs.css">
 </head>
 <body>
