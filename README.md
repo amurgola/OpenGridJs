@@ -71,6 +71,13 @@ function deleteRow(row) {
 }
 ```
 
+## Todo list
+- [ ] Click to sort columns
+- [ ] Better column size handling
+- [ ] Ability to auto define headers based on json context
+- [ ] Reloadable Data
+- [ ] Filter
+
 ## License
 
 Opengridjs is released under the MIT License.
