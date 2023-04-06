@@ -1,0 +1,116 @@
+.grid {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 14px;
+    user-select: none;
+    display: flex;
+    flex-direction: column;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+}
+
+.grid-header {
+    display: flex;
+    font-weight: 500;
+    background-color: #343a40;
+    color: #ffffff;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.grid-header-item {
+    flex-grow: 1;
+    text-align: left;
+    text-transform: capitalize;
+}
+
+.grid-rows-container {
+    overflow-y: scroll;
+    overflow-x: hidden;
+    position: relative;
+    flex-grow: 1;
+}
+
+.grid-row {
+    display: flex;
+    background-color: #ffffff;
+    padding: 10px;
+    align-items: center;
+    position: absolute;
+    width: 100%;
+    box-sizing: border-box;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.grid-row:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.grid-row:hover {
+    background-color: #e9ecef;
+}
+
+.selected-grid-row {
+    background-color: #dee2e6 !important;
+}
+
+.grid-column-item {
+    flex-grow: 1;
+    text-align: left;
+}
+
+.grid-rows-container::-webkit-scrollbar {
+    width: 10px;
+}
+
+.grid-rows-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.grid-rows-container::-webkit-scrollbar-thumb {
+    background: #888;
+}
+
+.grid-rows-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.contextMenu {
+    background-color: #343a40;
+    color: white;
+    font-weight: bold;
+    position: absolute;
+    border-radius: 3px;
+    min-width: 200px;
+    z-index: 100;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+}
+
+.contextMenu .btn {
+    width: 100%;
+    border-radius: 0;
+    background-color: #343a40 !important;
+    text-align: left;
+    color: white;
+    padding: 5px;
+    border: 0;
+    padding-left: 15px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.contextMenu .title {
+    padding: 10px;
+}
+
+.contextMenu hr {
+    margin: 2px;
+    background-color: #52525e !important;
+}
+
+.contextMenu .btn:hover {
+    background-color: #52525e !important;
+    color: white !important;
+}
