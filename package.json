@@ -1,5 +1,5 @@
 {
-  "name": "OpenGridJs",
+  "name": "opengridjs",
   "version": "1.0.0",
   "description": "A lightweight JavaScript grid framework that allows you to create fast and easy-to-use data grids in your web application. It supports virtual scrolling, custom column headers, and context menus.",
   "main": "opengridjs.js",
@@ -13,5 +13,8 @@
   "bugs": {
     "url": "https://github.com/amurgola/OpenGridJs/issues"
   },
-  "homepage": "https://github.com/amurgola/OpenGridJs#readme"
+  "homepage": "https://github.com/amurgola/OpenGridJs#readme",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
 }
