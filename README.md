@@ -22,7 +22,7 @@ npm i opengridjs
 To use via CDN, include the following URLs in your HTML file:
 
 ```html 
-<link rel="stylesheet" href="https://unpkg.com/opengridjs@1.0.0/opengridjs.css.css">
+<link rel="stylesheet" href="https://unpkg.com/opengridjs@1.0.0/opengridjs.css">
 <script src="https://unpkg.com/opengridjs@1.0.0/opengridjs.js"></script>
 ```
     
