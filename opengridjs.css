@@ -58,7 +58,11 @@
 
 .grid-column-item {
     flex-grow: 1;
-    text-align: left;
+    text-align: left
+}
+
+.grid-header-item, .grid-column-item{
+    min-width: 50px;
 }
 
 .grid-rows-container::-webkit-scrollbar {

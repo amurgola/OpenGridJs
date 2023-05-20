@@ -48,11 +48,17 @@ class Opengridjs {
 
         if(setup.columnHeaderNames == null){
             for(let i = 0; i < headers.length; i++){
-                headerData.push({data: headers[i], headerName: headers[i], width: gridItemWidthStyle });
+                headerData.push({
+                    data: headers[i],
+                    headerName: headers[i],
+                    width: gridItemWidthStyle });
             }
         } else {
             for(let i = 0; i < setup.columnHeaderNames.length; i++){
-                headerData.push({data: setup.columnHeaderNames[i].columnName, headerName: setup.columnHeaderNames[i].columnNameDisplay ?? setup.columnHeaderNames[i].columnName, width: gridItemWidthStyle});
+                headerData.push({
+                    data: setup.columnHeaderNames[i].columnName,
+                    headerName: setup.columnHeaderNames[i].columnNameDisplay ?? setup.columnHeaderNames[i].columnName,
+                    width: setup.columnHeaderNames[i].columnNameDisplay ? `min-width:${setup.columnHeaderNames[i].columnWidth}px` : gridItemWidthStyle});
             }
         }
         this.headerData = headerData;
