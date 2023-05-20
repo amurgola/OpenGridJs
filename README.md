@@ -22,8 +22,8 @@ npm i opengridjs
 To use via CDN, include the following URLs in your HTML file:
 
 ```html 
-<link rel="stylesheet" href="https://unpkg.com/opengridjs@1.0.0/opengridjs.css">
-<script src="https://unpkg.com/opengridjs@1.0.0/opengridjs.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/opengridjs@1.0.2/opengridjs.css">
+<script src="https://unpkg.com/opengridjs@1.0.2/opengridjs.js"></script>
 ```
     
 ## Usage
@@ -95,10 +95,16 @@ You can find a complete usage example here: https://codepen.io/amurgola/pen/Rweq
 
 ## Todo list
 - [X] Click to sort columns
-- [ ] Better column size handling
+- [X] Better column size handling
 - [X] Ability to auto define headers based on json context
 - [ ] Reloadable Data
 - [ ] Filter
+- [ ] Sort visualization
+- [ ] Ability to export to csv/excel
+- [ ] Drag to move columns
+- [ ] Drag to make columns larger
+- [ ] More options to define exact column width
+- [ ] Color options to control on a row by row level
 
 ## License
 
