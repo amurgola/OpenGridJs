@@ -9,6 +9,22 @@ Opengrid.js is an open-source lightweight JavaScript grid framework that allows 
 - Context menus with configurable actions
 - Lightweight and easy to integrate
 - Compatible with modern browsers
+
+## Installation
+## NPM
+To install via NPM, use the following command:
+
+```bash 
+npm i opengridjs
+```
+
+## CDN
+To use via CDN, include the following URLs in your HTML file:
+
+```html 
+<link rel="stylesheet" href="https://unpkg.com/opengridjs@1.0.0/opengridjs.css.css">
+<script src="https://unpkg.com/opengridjs@1.0.0/opengridjs.js"></script>
+```
     
 ## Usage
 
@@ -75,6 +91,7 @@ function deleteRow(row) {
     // Delete row logic
 }
 ```
+You can find a complete usage example here: https://codepen.io/amurgola/pen/RweqdMo
 
 ## Todo list
 - [X] Click to sort columns
