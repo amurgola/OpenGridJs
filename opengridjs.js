@@ -102,6 +102,7 @@ class Opengridjs {
         const rowClassName = `grid-row-${rowItem.position}`;
         gridRows.innerHTML += `<div data-id='${rowItem.data.id}' class='grid-row ${rowClassName}' style='top:${rowItem.position}px'></div>`;
         const gridRow = gridRows.getElementsByClassName(rowClassName)[0];
+
         gridRow.innerHTML = this.headerData.map(header => {
             const found = rowItem.data[header.data];
             return `<div class='grid-column-item' style='${header.width}'>${found ? found : '&nbsp;'}</div>`;
@@ -119,9 +120,10 @@ class Opengridjs {
 
     addEventListeners(setup) {
         const gridRowsContainer = document.querySelector('.grid-rows-container');
-        const gridRows = document.querySelector(".grid-rows");
-        gridRowsContainer.addEventListener('scroll', () => this.renderVisible(gridRowsContainer, gridRows));
-        gridRowsContainer.addEventListener('scroll', () => this.closeContextMenu());
+        gridRowsContainer.addEventListener('scroll', () => {
+            this.rerender();
+            this.closeContextMenu()
+        });
         this.createContextMenu(setup.contextMenuOptions);
         this.addHeaderActions();
     }
