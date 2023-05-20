@@ -77,9 +77,9 @@ function deleteRow(row) {
 ```
 
 ## Todo list
-- [ ] Click to sort columns
+- [X] Click to sort columns
 - [ ] Better column size handling
-- [ ] Ability to auto define headers based on json context
+- [X] Ability to auto define headers based on json context
 - [ ] Reloadable Data
 - [ ] Filter
 

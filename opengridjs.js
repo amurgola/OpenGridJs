@@ -71,7 +71,12 @@ class Opengridjs {
         this.renderVisible(gridRowsContainer, gridRows);
     }
 
-    renderVisible(gridRowsContainer, gridRows, contextMenuItems) {
+    rerender() {
+        this.processData(this.gridData.map(x => x.data));
+        this.generateGridRows();
+    }
+
+    renderVisible(gridRowsContainer, gridRows) {
         const currentPosition = gridRowsContainer.scrollTop;
         const visibleItems = this.gridData.filter(data => data.isRendered === false
             && data.position >= currentPosition
@@ -118,6 +123,33 @@ class Opengridjs {
         gridRowsContainer.addEventListener('scroll', () => this.renderVisible(gridRowsContainer, gridRows));
         gridRowsContainer.addEventListener('scroll', () => this.closeContextMenu());
         this.createContextMenu(setup.contextMenuOptions);
+        this.addHeaderActions();
+    }
+
+    addHeaderActions(){
+        const gridHeader = document.querySelector(".grid-header");
+        gridHeader.addEventListener('click', e => {
+            const header = e.target.getAttribute("data-header");
+            const headerData = this.headerData.find(x => x.data == header);
+            if(headerData){
+                headerData.sortDirection = headerData.sortDirection == null || headerData.sortDirection == 'desc' ? 'asc' : 'desc';
+                const sortDirection = headerData.sortDirection;
+
+                this.gridData.sort((a, b) => {
+                    a = a.data[header];
+                    b = b.data[header];
+
+                    if (a == null) return b == null ? 0 : -1;
+                    if (b == null) return 1;
+
+                    if (sortDirection == 'asc') return a > b ? 1 : (a < b ? -1 : 0);
+                    if (sortDirection == 'desc') return a > b ? -1 : (a < b ? 1 : 0);
+                });
+
+                this.rerender()
+                this.closeContextMenu()
+            }
+        });
     }
 
     createContextMenu(options) {
