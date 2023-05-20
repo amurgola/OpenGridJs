@@ -12,6 +12,7 @@ class Opengridjs {
         this.generateGridRows();
         this.addEventListeners(setup);
         this.contextMenuItems = setup.contextMenuOptions;
+        this.contextMenuTitle = setup.contextMenuTitle;
         document.querySelector(`.${className}`).gridInstance = this;
     }
 
@@ -120,7 +121,7 @@ class Opengridjs {
                     const id = gridRow.getAttribute("data-id");
                     this.gridSelectedObject = this.gridData.find(x => x.data.id == id).data;
 
-                    const title = "Title";
+                    const title = this.contextMenuTitle ?? "Title";
                     const left = `${e.pageX}px`;
                     const top = `${e.pageY}px`;
                     const selections = `

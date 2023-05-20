@@ -49,6 +49,7 @@ const setup = {
         { columnName: 'name' },
         { columnName: 'age' }
     ],
+    contextMenuTitle: "Context Title",
     contextMenuOptions: [
         {
             actionName: "Edit",
