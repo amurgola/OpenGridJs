@@ -58,7 +58,7 @@ class Opengridjs {
                 headerData.push({
                     data: setup.columnHeaderNames[i].columnName,
                     headerName: setup.columnHeaderNames[i].columnNameDisplay ?? setup.columnHeaderNames[i].columnName,
-                    width: setup.columnHeaderNames[i].columnNameDisplay ? `min-width:${setup.columnHeaderNames[i].columnWidth}px` : gridItemWidthStyle});
+                    width: setup.columnHeaderNames[i].columnWidth ? `min-width:${setup.columnHeaderNames[i].columnWidth}px` : gridItemWidthStyle});
             }
         }
         this.headerData = headerData;
