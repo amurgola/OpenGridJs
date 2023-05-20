@@ -37,16 +37,27 @@ class Opengridjs {
         const gridHeader = document.querySelector(".grid-header");
         gridHeader.setAttribute("data-pos", gridHeader.offsetTop);
 
-        const headers = setup.columnHeaderNames.length === 0
+        const headers = setup.columnHeaderNames == null
             ? this.gridColumnNames.map(columnNames => columnNames.headerName)
             : setup.columnHeaderNames.map(headerName => headerName.columnName);
+
+        const headerData = [];
 
         const gridItemWidth = 100 / headers.length;
         const gridItemWidthStyle = `width:${gridItemWidth}%`;
 
-        this.headerData = headers.map(header => ({data: header, width: gridItemWidthStyle}));
+        if(setup.columnHeaderNames == null){
+            for(let i = 0; i < headers.length; i++){
+                headerData.push({data: headers[i], headerName: headers[i], width: gridItemWidthStyle });
+            }
+        } else {
+            for(let i = 0; i < setup.columnHeaderNames.length; i++){
+                headerData.push({data: setup.columnHeaderNames[i].columnName, headerName: setup.columnHeaderNames[i].columnNameDisplay ?? setup.columnHeaderNames[i].columnName, width: gridItemWidthStyle});
+            }
+        }
+        this.headerData = headerData;
 
-        gridHeader.innerHTML = this.headerData.map(header => `<div class='grid-header-item' style='${header.width}'>${header.data}</div>`).join('');
+        gridHeader.innerHTML = this.headerData.map(header => `<div class='grid-header-item' data-header='${header.data}' style='${header.width}'>${header.headerName}</div>`).join('');
     }
 
     generateGridRows() {

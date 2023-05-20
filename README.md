@@ -46,7 +46,7 @@ const data = [
 const setup = {
     columnHeaderNames: [
         { columnName: 'id' },
-        { columnName: 'name' },
+        { columnName: 'name', columnNameDisplay: 'Full Name' },
         { columnName: 'age' }
     ],
     contextMenuTitle: "Context Title",
