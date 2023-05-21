@@ -118,3 +118,23 @@
     background-color: #52525e !important;
     color: white !important;
 }
+
+.sort-indicator {
+    margin-left: 5px;
+    display: inline-block;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    /* Add the following lines */
+    position: relative;
+    top: 0%;
+    transform: translateY(-50%);
+}
+
+.sort-desc .sort-indicator {
+    border-bottom: 4px solid white;
+}
+
+.sort-asc .sort-indicator {
+    border-top: 4px solid white;
+}
+

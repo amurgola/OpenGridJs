@@ -63,7 +63,10 @@ class Opengridjs {
         }
         this.headerData = headerData;
 
-        gridHeader.innerHTML = this.headerData.map(header => `<div class='grid-header-item' data-header='${header.data}' style='${header.width}'>${header.headerName}</div>`).join('');
+        gridHeader.innerHTML = this.headerData.map(header =>
+            `<div class='grid-header-item' data-header='${header.data}' style='${header.width}'>${header.headerName}<span class='sort-indicator'></span></div>`
+        ).join('');
+
     }
 
     generateGridRows() {
@@ -134,12 +137,13 @@ class Opengridjs {
         this.addHeaderActions();
     }
 
-    addHeaderActions(){
+    addHeaderActions() {
         const gridHeader = document.querySelector(".grid-header");
         gridHeader.addEventListener('click', e => {
             const header = e.target.getAttribute("data-header");
             const headerData = this.headerData.find(x => x.data == header);
-            if(headerData){
+
+            if(headerData) {
                 headerData.sortDirection = headerData.sortDirection == null || headerData.sortDirection == 'desc' ? 'asc' : 'desc';
                 const sortDirection = headerData.sortDirection;
 
@@ -152,6 +156,15 @@ class Opengridjs {
 
                     if (sortDirection == 'asc') return a > b ? 1 : (a < b ? -1 : 0);
                     if (sortDirection == 'desc') return a > b ? -1 : (a < b ? 1 : 0);
+                });
+
+                // Update sort indicators
+                const headerElements = Array.from(gridHeader.getElementsByClassName('grid-header-item'));
+                headerElements.forEach(headerElement => {
+                    headerElement.classList.remove('sort-asc', 'sort-desc');
+                    if (headerElement.getAttribute('data-header') === header) {
+                        headerElement.classList.add(sortDirection === 'asc' ? 'sort-asc' : 'sort-desc');
+                    }
                 });
 
                 this.rerender()
