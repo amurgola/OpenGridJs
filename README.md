@@ -41,6 +41,7 @@ First, include the `opengridjs.js` and `opengridjs.css` files in your HTML file.
 </head>
 <body>
     <div class="grid"></div>
+    
     <br/>
     <input type="text" id="filterInput" placeholder="Filter...">
     <script src="opengridjs.js"></script>
