@@ -3,6 +3,8 @@ class Opengridjs {
         this.gridData = [];
         this.headerData = [];
         this.gridRowPxSize = 35;
+        this.originalData = JSON.parse(JSON.stringify(data));
+        this.sortState = { column: null, direction: null };
         this.gridRowPxVisibleArea = gridHeight;
         this.gridColumnNames = Object.keys(data[0]).map(key => ({headerName: key, field: key}));
         this.gridSelectedObject = {};
@@ -31,6 +33,7 @@ class Opengridjs {
             position: currentPosition * this.gridRowPxSize,
             isRendered: false
         }));
+        this.sortData();
     }
 
     generateGridHeader(setup) {
@@ -81,7 +84,11 @@ class Opengridjs {
     }
 
     rerender() {
-        this.processData(this.gridData.map(x => x.data));
+        if (this.filteredData) {
+            this.processData(this.filteredData.map(x => x.data));
+        } else {
+            this.processData(this.gridData.map(x => x.data));
+        }
         this.generateGridRows();
     }
 
@@ -147,18 +154,11 @@ class Opengridjs {
                 headerData.sortDirection = headerData.sortDirection == null || headerData.sortDirection == 'desc' ? 'asc' : 'desc';
                 const sortDirection = headerData.sortDirection;
 
-                this.gridData.sort((a, b) => {
-                    a = a.data[header];
-                    b = b.data[header];
+                this.sortState = {
+                    header: header,
+                    sortDirection: sortDirection
+                };
 
-                    if (a == null) return b == null ? 0 : -1;
-                    if (b == null) return 1;
-
-                    if (sortDirection == 'asc') return a > b ? 1 : (a < b ? -1 : 0);
-                    if (sortDirection == 'desc') return a > b ? -1 : (a < b ? 1 : 0);
-                });
-
-                // Update sort indicators
                 const headerElements = Array.from(gridHeader.getElementsByClassName('grid-header-item'));
                 headerElements.forEach(headerElement => {
                     headerElement.classList.remove('sort-asc', 'sort-desc');
@@ -167,10 +167,38 @@ class Opengridjs {
                     }
                 });
 
+                this.sortData();
                 this.rerender()
                 this.closeContextMenu()
             }
         });
+    }
+
+    sortData() {
+        this.gridData.sort((a, b) => {
+            a = a.data[this.sortState.header];
+            b = b.data[this.sortState.header];
+
+            if (a == null) return b == null ? 0 : -1;
+            if (b == null) return 1;
+
+            if (this.sortState.sortDirection == 'asc') return a > b ? 1 : (a < b ? -1 : 0);
+            if (this.sortState.sortDirection == 'desc') return a > b ? -1 : (a < b ? 1 : 0);
+        });
+    }
+    searchFilter(term) {
+        const filteredData = this.originalData.filter(row => {
+            return Object.values(row).some(value =>
+                value.toString().toLowerCase().includes(term.toString().toLowerCase())
+            );
+        });
+        this.processData(filteredData);
+        this.rerender();
+    }
+
+    reset() {
+        this.processData(this.originalData);
+        this.rerender();
     }
 
     createContextMenu(options) {

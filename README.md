@@ -41,6 +41,8 @@ First, include the `opengridjs.js` and `opengridjs.css` files in your HTML file.
 </head>
 <body>
     <div class="grid"></div>
+    <br/>
+    <input type="text" id="filterInput" placeholder="Filter...">
     <script src="opengridjs.js"></script>
     <script>
         // Your script here
@@ -90,6 +92,15 @@ function editRow(row) {
 function deleteRow(row) {
     // Delete row logic
 }
+
+document.getElementById('filterInput').addEventListener('input', function(event) {
+    let searchTerm = event.target.value;
+    if(searchTerm) {
+        grid.searchFilter(searchTerm);
+    } else {
+        grid.reset();
+    }
+});
 ```
 You can find a complete usage example here: https://codepen.io/amurgola/pen/RweqdMo
 
@@ -98,13 +109,14 @@ You can find a complete usage example here: https://codepen.io/amurgola/pen/Rweq
 - [X] Better column size handling
 - [X] Ability to auto define headers based on json context
 - [ ] Reloadable Data
-- [ ] Filter
-- [ ] Sort visualization
+- [X] Filter
+- [X] Sort visualization
 - [ ] Ability to export to csv/excel
 - [ ] Drag to move columns
 - [ ] Drag to make columns larger
 - [ ] More options to define exact column width
 - [ ] Color options to control on a row by row level
+- [ ] Render child json data
 
 ## License
 
