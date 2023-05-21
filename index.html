@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opengridjs Example</title>
+    <link rel="stylesheet" href="opengridjs.css">
+</head>
+<body>
+
+<div class="grid"></div>
+<br/>
+<input type="text" id="filterInput" placeholder="Filter...">
+<script src="opengridjs.js"></script>
+<script>
+    const data = [
+        {id: 1, name: "John Doe", age: 30},
+        {id: 2, name: "Jane Doe", age: 28},
+        {id: 3, name: "Alice", age: 24},
+        {id: 4, name: "Bob", age: 32}
+    ];
+
+    const setup = {
+        columnHeaderNames: [
+            { columnName: 'id' },
+            { columnName: 'name', columnNameDisplay: 'Full Name', columnWidth: 200 },
+            { columnName: 'age' }
+        ],
+        contextMenuTitle: "Actions",
+        contextMenuOptions: [
+            {
+                actionName: "Edit",
+                actionFunctionName: "editRow",
+                className: "edit-row"
+            },
+            {
+                actionName: "Delete",
+                actionFunctionName: "deleteRow",
+                className: "delete-row"
+            }
+        ]
+    };
+
+    const grid = new Opengridjs("grid", data, 350, setup);
+
+    // Implement your custom functions like editRow and deleteRow
+    function editRow(row) {
+        // Edit row logic
+    }
+
+    function deleteRow(row) {
+        // Delete row logic
+    }
+</script>
+<script>
+    document.getElementById('filterInput').addEventListener('input', function(event) {
+        let searchTerm = event.target.value;
+        if(searchTerm) {
+            grid.searchFilter(searchTerm);
+        } else {
+            grid.reset();
+        }
+    });
+</script>
+</body>
+</html>
