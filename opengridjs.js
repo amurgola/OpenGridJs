@@ -230,6 +230,26 @@ class Opengridjs {
             });
         }
     }
+
+
+    exportToCSV() {
+        const items = this.gridData.map(x => x.data);
+        const replacer = (key, value) => value === null ? '' : value;
+        const header = Object.keys(items[0]);
+        let csv = items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','));
+        csv.unshift(header.join(','));
+        csv = csv.join('\r\n');
+
+        const csvBlob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const csvUrl = URL.createObjectURL(csvBlob);
+        const link = document.createElement('a');
+        link.href = csvUrl;
+        link.setAttribute('download', 'export.csv');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
     closeContextMenu(action) {
         document.querySelectorAll('.contextMenu').forEach(item => item.remove());
         document.querySelectorAll('.selected-grid-row').forEach(item => item.classList.remove('selected-grid-row'));
