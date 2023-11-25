@@ -202,7 +202,7 @@ class Opengridjs {
     }
 
     createContextMenu(options) {
-        if(options){
+        if (options) {
             const gridRows = document.querySelectorAll('.grid-row');
             gridRows.forEach(gridRow => {
                 gridRow.addEventListener('contextmenu', e => {
@@ -217,20 +217,28 @@ class Opengridjs {
                     const left = `${e.pageX}px`;
                     const top = `${e.pageY}px`;
                     const selections = `
-                <div class="contextMenu" style="left:${left}; top: ${top}">
-                    <div class="title">${title}</div><hr/>
-                    ${options.map(option => `<button data-id="${id}" class="${option.className} btn" onclick="this.closest('.grid').gridInstance.closeContextMenu(() => ${option.actionFunctionName}(this.closest('.grid').gridInstance.gridSelectedObject))">${option.actionName}</button>`).join('')}
-                    <br/>&nbsp;
-                </div>`;
+                    <div class="contextMenu" style="left:${left}; top: ${top}">
+                        <div class="title">${title}</div><hr/>
+                        ${options.map((option, index) => `<button data-id="${id}" class="context-menu-button ${option.className} btn" data-action="${option.actionFunctionName}">${option.actionName}</button>`).join('')}
+                        <br/>&nbsp;
+                    </div>`;
 
                     document.querySelector('.grid-additional').innerHTML += selections;
+
+                    // Attach event listeners to each button
+                    document.querySelectorAll('.context-menu-button').forEach(button => {
+                        button.addEventListener('click', (event) => {
+                            const actionFunctionName = event.target.getAttribute('data-action');
+                            window[actionFunctionName](this.gridSelectedObject);
+                            this.closeContextMenu();
+                        });
+                    });
                 });
 
                 gridRow.addEventListener('click', () => this.closeContextMenu());
             });
         }
     }
-
 
     exportToCSV() {
         const items = this.gridData.map(x => x.data);
@@ -258,4 +266,3 @@ class Opengridjs {
         }
     }
 }
-
