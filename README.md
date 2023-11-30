@@ -41,13 +41,20 @@ Include the `opengridjs.js` and `opengridjs.css` files in your HTML file, then u
         <div class="grid"></div>
         <script>
             const setup = {
-                columnHeaderNames: [
-                    {
-                        columnName: "name",
-                        columnNameDisplay: "Full Name",
+            columnHeaderNames: [
+                {
+                    columnName: "name",
+                    columnNameDisplay: "Full Name",
+                },
+                { columnName: "phoneNumber" },
+                {
+                    columnName: "email",
+                    columnNameDisplay: "Email",
+                    format: function (value) {
+                        return "<a href='mailto:" + value + "'>" + value + "</a>";
                     },
-                    { columnName: "phoneNumber" },
-                ],
+                }
+            ],
                 contextMenuTitle: "Context Title",
                 contextMenuOptions: [
                     {
