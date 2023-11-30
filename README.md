@@ -28,82 +28,54 @@ To use via CDN, include the following URLs in your HTML file:
     
 ## Usage
 
-First, include the `opengridjs.js` and `opengridjs.css` files in your HTML file.
+Include the `opengridjs.js` and `opengridjs.css` files in your HTML file, then use the below as an example of how to use the grid. The setup object is optional and can be used to customize the grid. The setup object can be used to define the column headers, context menu, and context menu actions.
 
 ```javascript
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Opengridjs Example</title>
-    <link rel="stylesheet" href="opengridjs.css">
-</head>
-<body>
-    <div class="grid"></div>
+    <head>
+        <link rel="stylesheet" href="https://unpkg.com/opengridjs/opengridjs.css">
+        <script src="https://unpkg.com/opengridjs/opengridjs.js"></script>
+    </head>
+    <body>
+        <div class="grid"></div>
+        <script>
+            const setup = {
+                columnHeaderNames: [
+                    {
+                        columnName: "name",
+                        columnNameDisplay: "Full Name",
+                    },
+                    { columnName: "phoneNumber" },
+                ],
+                contextMenuTitle: "Context Title",
+                contextMenuOptions: [
+                    {
+                        actionName: "Example",
+                        actionFunctionName: "exampleRow",
+                        className: "example-row",
+                    },
+                ],
+            };
     
-    <br/>
-    <input type="text" id="filterInput" placeholder="Filter...">
-    <button onclick="grid.exportToCSV()">Export Csv</button>
-    <script src="opengridjs.js"></script>
-    <script>
-        // Your script here
-    </script>
-</body>
+            fetch("https://lumabyte.com/api/generateMockRandomPeople?count=1000")
+                .then((response) => response.json())
+                .then((data) => {
+                    initGrid(data);
+            });
+    
+            function initGrid(data) {
+                var grid = new Opengridjs("grid", data, 350, setup);
+            }
+    
+            function exampleRow(row) {
+                alert("Example row " + row.email);
+            }
+        </script>
+    </body>
 </html>
 ```
 
-Then, initialize the grid with your desired configuration:
-
-```javascript
-const data = [
-    {id: 1, name: "John Doe", age: 30},
-    {id: 2, name: "Jane Doe", age: 28},
-    {id: 3, name: "Alice", age: 24},
-    // ...
-];
-
-const setup = {
-    columnHeaderNames: [
-        { columnName: 'id' },
-        { columnName: 'name', columnNameDisplay: 'Full Name', columnWidth: 200 },
-        { columnName: 'age' }
-    ],
-    contextMenuTitle: "Context Title",
-    contextMenuOptions: [
-        {
-            actionName: "Edit",
-            actionFunctionName: "editRow",
-            className: "edit-row"
-        },
-        {
-            actionName: "Delete",
-            actionFunctionName: "deleteRow",
-            className: "delete-row"
-        }
-    ]
-};
-
-const grid = new Opengridjs("grid", data, 350, setup);
-
-// Implement your custom functions like editRow and deleteRow
-function editRow(row) {
-    // Edit row logic
-}
-
-function deleteRow(row) {
-    // Delete row logic
-}
-
-document.getElementById('filterInput').addEventListener('input', function(event) {
-    let searchTerm = event.target.value;
-    if(searchTerm) {
-        grid.searchFilter(searchTerm);
-    } else {
-        grid.reset();
-    }
-});
-```
 You can find a complete usage example here: https://codepen.io/amurgola/pen/RweqdMo
 
 ## Todo list
@@ -114,10 +86,10 @@ You can find a complete usage example here: https://codepen.io/amurgola/pen/Rweq
 - [X] Filter
 - [X] Sort visualization
 - [x] Ability to export to csv
+- [X] ~~Color options to control on a row by row level~~ Added formatter
 - [ ] Reloadable Data
 - [ ] Drag to move columns
 - [ ] Drag to make columns larger
-- [ ] Color options to control on a row by row level
 - [ ] Render child json data
 - [ ] Ability to export to excel
 

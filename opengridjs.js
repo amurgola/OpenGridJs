@@ -61,7 +61,9 @@ class Opengridjs {
                 headerData.push({
                     data: setup.columnHeaderNames[i].columnName,
                     headerName: setup.columnHeaderNames[i].columnNameDisplay ?? setup.columnHeaderNames[i].columnName,
-                    width: setup.columnHeaderNames[i].columnWidth ? `min-width:${setup.columnHeaderNames[i].columnWidth}px` : gridItemWidthStyle});
+                    width: setup.columnHeaderNames[i].columnWidth ? `min-width:${setup.columnHeaderNames[i].columnWidth}px` : gridItemWidthStyle,
+                    format: setup.columnHeaderNames[i].format,
+                });
             }
         }
         this.headerData = headerData;
@@ -120,8 +122,14 @@ class Opengridjs {
         const gridRow = gridRows.getElementsByClassName(rowClassName)[0];
 
         gridRow.innerHTML = this.headerData.map(header => {
-            const found = rowItem.data[header.data];
-            return `<div class='grid-column-item' style='${header.width}'>${found ? found : '&nbsp;'}</div>`;
+            let found = rowItem.data[header.data] ?? '&nbsp;';
+            var formatter = header.format;
+
+            if (formatter) {
+                found = formatter(found);
+            }
+
+            return `<div class='grid-column-item' style='${header.width}'>${found}</div>`;
         }).join('');
     }
 

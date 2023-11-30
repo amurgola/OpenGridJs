@@ -1,0 +1,49 @@
+<html>
+<head>
+    <link rel="stylesheet" href="opengridjs.css">
+    <script src="opengridjs.js"></script>
+</head>
+<body>
+<div class="grid"></div>
+<script>
+    const setup = {
+        columnHeaderNames: [
+            {
+                columnName: "name",
+                columnNameDisplay: "Full Name",
+            },
+            { columnName: "phoneNumber" },
+            {
+                columnName: "email",
+                columnNameDisplay: "Email",
+                format: function (value) {
+                    return "<a href='mailto:" + value + "'>" + value + "</a>";
+                },
+            },
+        ],
+        contextMenuTitle: "Context Title",
+        contextMenuOptions: [
+            {
+                actionName: "Example",
+                actionFunctionName: "exampleRow",
+                className: "example-row",
+            },
+        ],
+    };
+
+    fetch("https://lumabyte.com/api/generateMockRandomPeople?count=1000")
+        .then((response) => response.json())
+        .then((data) => {
+            initGrid(data);
+        });
+
+    function initGrid(data) {
+        var grid = new Opengridjs("grid", data, 350, setup);
+    }
+
+    function exampleRow(row) {
+        alert("Example row " + row.email);
+    }
+</script>
+</body>
+</html>
