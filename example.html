@@ -31,14 +31,15 @@
         ],
     };
 
-    fetch("https://lumabyte.com/api/generateMockRandomPeople?count=1000")
-        .then((response) => response.json())
-        .then((data) => {
-            initGrid(data);
-        });
+    function loadDemoData() {
+        return fetch("https://lumabyte.com/api/generateMockRandomPeople?count=100")
+            .then((response) => response.json());
+    }
 
-    function initGrid(data) {
-        var grid = new Opengridjs("grid", data, 350, setup);
+    var grid = new Opengridjs("grid", loadDemoData, 350, setup, loadMore);
+
+    function loadMore() {
+        grid.appendData(loadDemoData);
     }
 
     function exampleRow(row) {

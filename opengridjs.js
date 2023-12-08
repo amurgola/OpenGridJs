@@ -1,21 +1,50 @@
 class Opengridjs {
-    constructor(className, data, gridHeight, setup) {
+    loadMoreDataFunction = null;
+    canLoadMoreData = true;
+    isLoadingMoreData = false;
+    loadedAtGridHeight = []
+
+    constructor(className, data, gridHeight, setup, loadMoreDataFunction = null) {
+        if (typeof data === 'function') {
+            data().then(fetchedData => {
+                this.originalData = JSON.parse(JSON.stringify(fetchedData));
+                this.gridColumnNames = Object.keys(fetchedData[0]).map(key => ({headerName: key, field: key}));
+                this.initGrid(className);
+                this.processData(fetchedData);
+                this.generateGridHeader(setup);
+                this.generateGridRows();
+                this.addEventListeners(setup);
+            });
+        } else {
+            this.originalData = JSON.parse(JSON.stringify(data));
+            this.gridColumnNames = Object.keys(data[0]).map(key => ({headerName: key, field: key}));
+            this.initGrid(className);
+            this.processData(data);
+            this.generateGridHeader(setup);
+            this.generateGridRows();
+            this.addEventListeners(setup);
+        }
+
         this.gridData = [];
         this.headerData = [];
         this.gridRowPxSize = 35;
-        this.originalData = JSON.parse(JSON.stringify(data));
         this.sortState = { column: null, direction: null };
         this.gridRowPxVisibleArea = gridHeight;
-        this.gridColumnNames = Object.keys(data[0]).map(key => ({headerName: key, field: key}));
         this.gridSelectedObject = {};
-        this.initGrid(className);
-        this.processData(data);
-        this.generateGridHeader(setup);
-        this.generateGridRows();
-        this.addEventListeners(setup);
         this.contextMenuItems = setup.contextMenuOptions;
         this.contextMenuTitle = setup.contextMenuTitle;
+        this.loadMoreDataFunction = loadMoreDataFunction;
         document.querySelector(`.${className}`).gridInstance = this;
+    }
+
+    debounce(func, delay) {
+        let inDebounce;
+        return function() {
+            const context = this;
+            const args = arguments;
+            clearTimeout(inDebounce);
+            inDebounce = setTimeout(() => func.apply(context, args), delay);
+        };
     }
 
     initGrid(className) {
@@ -144,9 +173,22 @@ class Opengridjs {
 
     addEventListeners(setup) {
         const gridRowsContainer = document.querySelector('.grid-rows-container');
+        const debouncedLoadMore = this.debounce(() => {
+            if (this.isNearBottom(gridRowsContainer) && this.canLoadMoreData && !this.isLoadingMoreData) {
+                this.isLoadingMoreData = true;
+                this.loadMoreDataFunction(() => {
+                    this.isLoadingMoreData = false;
+                });
+            }
+        }, 300);
+        gridRowsContainer.addEventListener('scroll', debouncedLoadMore);
         gridRowsContainer.addEventListener('scroll', () => {
             this.rerender();
             this.closeContextMenu()
+
+            if (this.isNearBottom(gridRowsContainer) && this.canLoadMoreData && this.loadMoreDataFunction) {
+                this.loadMoreDataFunction();
+            }
         });
         this.createContextMenu(setup.contextMenuOptions);
         this.addHeaderActions();
@@ -273,4 +315,40 @@ class Opengridjs {
             action(this.gridSelectedObject);
         }
     }
+
+    isNearBottom(container) {
+        var result = container.scrollHeight == container.scrollTop + this.gridRowPxVisibleArea + 4;
+        if(result && !this.loadedAtGridHeight.includes(container.scrollTop)) {
+            this.loadedAtGridHeight.push(container.scrollTop);
+            return true;
+        }
+        return false;
+    }
+
+    appendData(newData) {
+        if (typeof newData === 'function') {
+            newData().then(fetchedData => {
+                if (fetchedData && fetchedData.length > 0) {
+                    this.originalData = [...this.originalData, ...fetchedData];
+                    this.processData(this.originalData);
+                    this.rerender();
+                } else {
+                    this.canLoadMoreData = false;
+                }
+            });
+        } else {
+            if (newData && newData.length > 0) {
+                this.originalData = [...this.originalData, ...newData];
+                this.processData(this.originalData);
+                this.rerender();
+            } else {
+                this.canLoadMoreData = false;
+            }
+        }
+    }
+
+    stopLoadingMoreData() {
+        this.canLoadMoreData = false;
+    }
+
 }

@@ -37,53 +37,79 @@ Include the `opengridjs.js` and `opengridjs.css` files in your HTML file, then u
         <link rel="stylesheet" href="https://unpkg.com/opengridjs/opengridjs.css">
         <script src="https://unpkg.com/opengridjs/opengridjs.js"></script>
     </head>
-    <body>
-        <div class="grid"></div>
-        <script>
-            const setup = {
-                columnHeaderNames: [
-                    {
-                        columnName: "name",
-                        columnNameDisplay: "Full Name",
-                    },
-                    { columnName: "phoneNumber" },
-                    {
-                        columnName: "email",
-                        columnNameDisplay: "Email",
-                        format: function (value) {
-                            return "<a href='mailto:" + value + "'>" + value + "</a>";
+        <body>
+            <div class="grid"></div>
+            <script>
+                const setup = {
+                    columnHeaderNames: [
+                        {
+                            columnName: "name",
+                            columnNameDisplay: "Full Name",
                         },
-                    }
-                ],
-                contextMenuTitle: "Context Title",
-                contextMenuOptions: [
-                    {
-                        actionName: "Example",
-                        actionFunctionName: "exampleRow",
-                        className: "example-row",
-                    },
-                ],
-            };
-    
-            fetch("https://lumabyte.com/api/generateMockRandomPeople?count=1000")
-                .then((response) => response.json())
-                .then((data) => {
-                    initGrid(data);
-            });
-    
-            function initGrid(data) {
-                var grid = new Opengridjs("grid", data, 350, setup);
-            }
-    
-            function exampleRow(row) {
-                alert("Example row " + row.email);
-            }
-        </script>
-    </body>
+                        { columnName: "phoneNumber" },
+                        {
+                            columnName: "email",
+                            columnNameDisplay: "Email",
+                            format: function (value) {
+                                return "<a href='mailto:" + value + "'>" + value + "</a>";
+                            },
+                        },
+                    ],
+                    contextMenuTitle: "Context Title",
+                    contextMenuOptions: [
+                        {
+                            actionName: "Example",
+                            actionFunctionName: "exampleRow",
+                            className: "example-row",
+                        }
+                    ],
+                };
+            
+                function loadDemoData() {
+                    return fetch("https://lumabyte.com/api/generateMockRandomPeople?count=100")
+                        .then((response) => response.json());
+                }
+            
+                var grid = new Opengridjs("grid", loadDemoData, 350, setup, loadMore);
+            
+                function loadMore() {
+                    grid.appendData(loadDemoData);
+                }
+            
+                function exampleRow(row) {
+                    alert("Example row " + row.email);
+                }
+            </script>
+        </body>
 </html>
 ```
 
-You can find a complete usage example here: https://codepen.io/amurgola/pen/RweqdMo
+#### Constructor Parameters
+- `className`: The class name of the container where the grid will be rendered.
+- `data`: The initial set of data to be displayed. This can be an array of objects or a function returning a promise for asynchronous data loading.
+- `gridHeight`: The height of the grid in pixels.
+- `setup`: An object containing configurations such as column headers and context menu settings.
+- `loadMoreDataFunction`: An optional function that will be called to load more data (useful for implementing infinite scrolling).
+
+#### Setup Object
+The setup object allows you to customize the grid's appearance and behavior. It supports the following properties:
+
+- `columnHeaderNames`: An array of objects defining the columns of the grid. Each object can specify columnName, columnNameDisplay, and format (a function to format the cell value).
+- `contextMenuTitle`: A string defining the title of the context menu.
+- `contextMenuOptions`: An array of objects defining the context menu options. Each option can specify actionName, actionFunctionName, and className.
+
+#### Methods
+The setup object allows you to customize the grid's appearance and behavior. It supports the following properties:
+
+- `appendData(data)`: Appends new data to the grid.
+- `rerender()`: Rerenders the grid. Useful if the data or configuration changes.
+- `reset()`: Resets the grid to its initial state.
+- `exportToCSV()`: Exports the current grid data to a CSV file.
+- `searchFilter(term)`: Filters the grid data based on the search term.
+- `stopLoadingMoreData()`: Stops the grid from calling the loadMoreDataFunction.
+
+
+You can find a usage example here: https://codepen.io/amurgola/pen/RweqdMo
 
 ## Todo list
 - [X] Click to sort columns
@@ -94,11 +120,11 @@ You can find a complete usage example here: https://codepen.io/amurgola/pen/Rweq
 - [X] Sort visualization
 - [x] Ability to export to csv
 - [X] ~~Color options to control on a row by row level~~ Added formatter
+- [X] Ability to dynamically load data
 - [ ] Reloadable Data
 - [ ] Drag to move columns
 - [ ] Drag to make columns larger
 - [ ] Render child json data
-- [ ] Ability to export to excel
 
 ## License
 
