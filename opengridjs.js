@@ -5,6 +5,17 @@ class Opengridjs {
     loadedAtGridHeight = []
 
     constructor(className, data, gridHeight, setup, loadMoreDataFunction = null) {
+        this.sortState = { column: null, direction: null };
+        this.gridData = [];
+        this.headerData = [];
+        this.gridRowPxSize = 35;
+        this.gridRowPxVisibleArea = gridHeight;
+        this.gridSelectedObject = {};
+        this.contextMenuItems = setup.contextMenuOptions;
+        this.contextMenuTitle = setup.contextMenuTitle;
+        this.loadMoreDataFunction = loadMoreDataFunction;
+        
+        document.querySelector(`.${className}`).gridInstance = this;
         if (typeof data === 'function') {
             data().then(fetchedData => {
                 this.originalData = JSON.parse(JSON.stringify(fetchedData));
@@ -24,17 +35,6 @@ class Opengridjs {
             this.generateGridRows();
             this.addEventListeners(setup);
         }
-
-        this.gridData = [];
-        this.headerData = [];
-        this.gridRowPxSize = 35;
-        this.sortState = { column: null, direction: null };
-        this.gridRowPxVisibleArea = gridHeight;
-        this.gridSelectedObject = {};
-        this.contextMenuItems = setup.contextMenuOptions;
-        this.contextMenuTitle = setup.contextMenuTitle;
-        this.loadMoreDataFunction = loadMoreDataFunction;
-        document.querySelector(`.${className}`).gridInstance = this;
     }
 
     debounce(func, delay) {
