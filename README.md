@@ -30,6 +30,9 @@ To use via CDN, include the following URLs in your HTML file:
 
 Include the `opengridjs.js` and `opengridjs.css` files in your HTML file, then use the below as an example of how to use the grid. The setup object is optional and can be used to customize the grid. The setup object can be used to define the column headers, context menu, and context menu actions.
 
+## Demo
+![](https://github.com/amurgola/OpenGridJs/blob/main/demo.gif)
+
 ```javascript
 <!DOCTYPE html>
 <html lang="en">
