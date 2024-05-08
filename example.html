@@ -31,16 +31,16 @@
         ],
     };
 
-    function loadDemoData() {
+    async function loadDemoData() {
         return fetch("https://lumabyte.com/api/generateMockRandomPeople?count=100")
             .then((response) => response.json());
     }
-
-    var grid = new Opengridjs("grid", loadDemoData, 350, setup, loadMore);
-
-    function loadMore() {
-        grid.appendData(loadDemoData);
+    async function loadMoreDemoData() {
+        loadDemoData()
+            .then((jsonData) => grid.appendData(jsonData))
     }
+
+    var grid = new Opengridjs("grid", loadDemoData, 350, setup, loadMoreDemoData);
 
     function exampleRow(row) {
         alert("Example row " + row.email);
