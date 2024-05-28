@@ -1,7 +1,7 @@
 <html>
 <head>
-    <link rel="stylesheet" href="https://unpkg.com/opengridjs@latest/opengridjs.css">
-    <script src="https://unpkg.com/opengridjs@latest/opengridjs.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/opengridjs@latest/opengrid.min.css">
+    <script src="https://unpkg.com/opengridjs@latest/opengrid.min.js"></script>
 </head>
 <body>
 <div class="grid"></div>
@@ -40,7 +40,7 @@
             .then((jsonData) => grid.appendData(jsonData))
     }
 
-    var grid = new Opengridjs("grid", loadDemoData, 350, setup, loadMoreDemoData);
+    var grid = new OpenGrid("grid", loadDemoData, 350, setup, loadMoreDemoData);
 
     function exampleRow(row) {
         alert("Example row " + row.email);

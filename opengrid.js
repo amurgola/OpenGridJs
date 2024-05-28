@@ -1,4 +1,4 @@
-class Opengridjs {
+class OpenGrid {
     loadMoreDataFunction = null;
     canLoadMoreData = true;
     isLoadingMoreData = false;
@@ -14,12 +14,14 @@ class Opengridjs {
         this.contextMenuItems = setup.contextMenuOptions;
         this.contextMenuTitle = setup.contextMenuTitle;
         this.loadMoreDataFunction = loadMoreDataFunction;
-        
+
         document.querySelector(`.${className}`).gridInstance = this;
         if (typeof data === 'function') {
             data().then(fetchedData => {
                 this.originalData = JSON.parse(JSON.stringify(fetchedData));
-                this.gridColumnNames = Object.keys(fetchedData[0]).map(key => ({headerName: key, field: key}));
+                if(fetchedData.length > 0) {
+                    this.gridColumnNames = Object.keys(fetchedData[0]).map(key => ({headerName: key, field: key}));
+                }
                 this.initGrid(className);
                 this.processData(fetchedData);
                 this.generateGridHeader(setup);
@@ -28,7 +30,9 @@ class Opengridjs {
             });
         } else {
             this.originalData = JSON.parse(JSON.stringify(data));
-            this.gridColumnNames = Object.keys(data[0]).map(key => ({headerName: key, field: key}));
+            if(data.length > 0){
+                this.gridColumnNames = Object.keys(data[0]).map(key => ({headerName: key, field: key}));
+            }
             this.initGrid(className);
             this.processData(data);
             this.generateGridHeader(setup);
@@ -344,6 +348,20 @@ class Opengridjs {
             } else {
                 this.canLoadMoreData = false;
             }
+        }
+    }
+
+    updateData(newData) {
+        if (typeof newData === 'function') {
+            newData().then(fetchedData => {
+                this.originalData = fetchedData;
+                this.processData(this.originalData);
+                this.rerender();
+            });
+        } else {
+            this.originalData = newData;
+            this.processData(this.originalData);
+            this.rerender();
         }
     }
 
