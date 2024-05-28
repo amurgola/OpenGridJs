@@ -73,7 +73,7 @@ Include the `opengrid.js` and `opengrid.css` files in your HTML file, then use t
                         .then((response) => response.json());
                 }
             
-                var grid = new Opengridjs("grid", loadDemoData, 350, setup, loadMore);
+                var grid = new OpenGrid("grid", loadDemoData, 350, setup, loadMore);
             
                 function loadMore() {
                     grid.appendData(loadDemoData);
