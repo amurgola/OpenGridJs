@@ -5,6 +5,7 @@ class OpenGrid {
     loadedAtGridHeight = []
 
     constructor(className, data, gridHeight, setup, loadMoreDataFunction = null) {
+        this.className = className;
         this.sortState = { column: null, direction: null };
         this.gridData = [];
         this.headerData = [];
@@ -15,14 +16,17 @@ class OpenGrid {
         this.contextMenuTitle = setup.contextMenuTitle;
         this.loadMoreDataFunction = loadMoreDataFunction;
 
-        document.querySelector(`.${className}`).gridInstance = this;
+        this.rootElement = document.querySelector(`.${className}`);
+        this.rootElement.gridInstance = this;
+        this.rootElement.classList.add('opengridjs-grid'); // Automatically add 'grid' class
+
         if (typeof data === 'function') {
             data().then(fetchedData => {
                 this.originalData = JSON.parse(JSON.stringify(fetchedData));
                 if(fetchedData.length > 0) {
                     this.gridColumnNames = Object.keys(fetchedData[0]).map(key => ({headerName: key, field: key}));
                 }
-                this.initGrid(className);
+                this.initGrid();
                 this.processData(fetchedData);
                 this.generateGridHeader(setup);
                 this.generateGridRows();
@@ -33,7 +37,7 @@ class OpenGrid {
             if(data.length > 0){
                 this.gridColumnNames = Object.keys(data[0]).map(key => ({headerName: key, field: key}));
             }
-            this.initGrid(className);
+            this.initGrid();
             this.processData(data);
             this.generateGridHeader(setup);
             this.generateGridRows();
@@ -51,13 +55,12 @@ class OpenGrid {
         };
     }
 
-    initGrid(className) {
-        const grid = document.getElementsByClassName(className)[0];
-        grid.classList.add("grid-container");
-        grid.innerHTML = `
-        <div class='grid-additional'></div>
-        <div class='grid-header'></div>
-        <div class='grid-rows-container'></div>`;
+    initGrid() {
+        this.rootElement.classList.add("opengridjs-grid-container");
+        this.rootElement.innerHTML = `
+        <div class='opengridjs-grid-additional'></div>
+        <div class='opengridjs-grid-header'></div>
+        <div class='opengridjs-grid-rows-container'></div>`;
     }
 
     processData(data) {
@@ -70,7 +73,7 @@ class OpenGrid {
     }
 
     generateGridHeader(setup) {
-        const gridHeader = document.querySelector(".grid-header");
+        const gridHeader = this.rootElement.querySelector(".opengridjs-grid-header");
         gridHeader.setAttribute("data-pos", gridHeader.offsetTop);
 
         const headers = setup.columnHeaderNames == null
@@ -102,17 +105,17 @@ class OpenGrid {
         this.headerData = headerData;
 
         gridHeader.innerHTML = this.headerData.map(header =>
-            `<div class='grid-header-item' data-header='${header.data}' style='${header.width}'>${header.headerName}<span class='sort-indicator'></span></div>`
+            `<div class='opengridjs-grid-header-item' data-header='${header.data}' style='${header.width}'>${header.headerName}<span class='opengridjs-sort-indicator'></span></div>`
         ).join('');
 
     }
 
     generateGridRows() {
-        const gridRowsContainer = document.querySelector('.grid-rows-container');
+        const gridRowsContainer = this.rootElement.querySelector('.opengridjs-grid-rows-container');
         gridRowsContainer.style.height = `${this.gridRowPxVisibleArea}px`;
-        gridRowsContainer.innerHTML = "<div class='grid-rows'></div>";
+        gridRowsContainer.innerHTML = "<div class='opengridjs-grid-rows'></div>";
 
-        const gridRows = document.querySelector(".grid-rows");
+        const gridRows = this.rootElement.querySelector(".opengridjs-grid-rows");
         gridRows.style.height = `${this.gridRowPxSize * this.gridData.length}px`;
 
         this.renderVisible(gridRowsContainer, gridRows);
@@ -150,8 +153,8 @@ class OpenGrid {
 
     addRow(gridRows, rowItem) {
         rowItem.isRendered = true;
-        const rowClassName = `grid-row-${rowItem.position}`;
-        gridRows.innerHTML += `<div data-id='${rowItem.data.id}' class='grid-row ${rowClassName}' style='top:${rowItem.position}px'></div>`;
+        const rowClassName = `opengridjs-grid-row-${rowItem.position}`;
+        gridRows.innerHTML += `<div data-id='${rowItem.data.id}' class='opengridjs-grid-row ${rowClassName}' style='top:${rowItem.position}px'></div>`;
         const gridRow = gridRows.getElementsByClassName(rowClassName)[0];
 
         gridRow.innerHTML = this.headerData.map(header => {
@@ -162,13 +165,13 @@ class OpenGrid {
                 found = formatter(found);
             }
 
-            return `<div class='grid-column-item' style='${header.width}'>${found}</div>`;
+            return `<div class='opengridjs-grid-column-item' style='${header.width}'>${found}</div>`;
         }).join('');
     }
 
     removeRow(rowItem) {
         rowItem.isRendered = false;
-        const rowClassName = `grid-row-${rowItem.position}`;
+        const rowClassName = `opengridjs-grid-row-${rowItem.position}`;
         const found = document.querySelector(`.${rowClassName}`);
         if (found) {
             found.remove();
@@ -176,7 +179,7 @@ class OpenGrid {
     }
 
     addEventListeners(setup) {
-        const gridRowsContainer = document.querySelector('.grid-rows-container');
+        const gridRowsContainer = this.rootElement.querySelector('.opengridjs-grid-rows-container');
         const debouncedLoadMore = this.debounce(() => {
             if (this.isNearBottom(gridRowsContainer) && this.canLoadMoreData && !this.isLoadingMoreData) {
                 this.isLoadingMoreData = true;
@@ -199,7 +202,7 @@ class OpenGrid {
     }
 
     addHeaderActions() {
-        const gridHeader = document.querySelector(".grid-header");
+        const gridHeader = this.rootElement.querySelector(".opengridjs-grid-header");
         gridHeader.addEventListener('click', e => {
             const header = e.target.getAttribute("data-header");
             const headerData = this.headerData.find(x => x.data == header);
@@ -213,11 +216,11 @@ class OpenGrid {
                     sortDirection: sortDirection
                 };
 
-                const headerElements = Array.from(gridHeader.getElementsByClassName('grid-header-item'));
+                const headerElements = Array.from(gridHeader.getElementsByClassName('opengridjs-grid-header-item'));
                 headerElements.forEach(headerElement => {
-                    headerElement.classList.remove('sort-asc', 'sort-desc');
+                    headerElement.classList.remove('opengridjs-sort-asc', 'opengridjs-sort-desc');
                     if (headerElement.getAttribute('data-header') === header) {
-                        headerElement.classList.add(sortDirection === 'asc' ? 'sort-asc' : 'sort-desc');
+                        headerElement.classList.add(sortDirection === 'asc' ? 'opengridjs-sort-asc' : 'opengridjs-sort-desc');
                     }
                 });
 
@@ -257,12 +260,12 @@ class OpenGrid {
 
     createContextMenu(options) {
         if (options) {
-            const gridRows = document.querySelectorAll('.grid-row');
+            const gridRows = this.rootElement.querySelectorAll('.opengridjs-grid-row');
             gridRows.forEach(gridRow => {
                 gridRow.addEventListener('contextmenu', e => {
                     e.preventDefault();
                     this.closeContextMenu();
-                    gridRow.classList.add('selected-grid-row');
+                    gridRow.classList.add('opengridjs-selected-grid-row');
 
                     const id = gridRow.getAttribute("data-id");
                     this.gridSelectedObject = this.gridData.find(x => x.data.id == id).data;
@@ -271,16 +274,16 @@ class OpenGrid {
                     const left = `${e.pageX}px`;
                     const top = `${e.pageY}px`;
                     const selections = `
-                    <div class="contextMenu" style="left:${left}; top: ${top}">
-                        <div class="title">${title}</div><hr/>
-                        ${options.map((option, index) => `<button data-id="${id}" class="context-menu-button ${option.className} btn" data-action="${option.actionFunctionName}">${option.actionName}</button>`).join('')}
+                    <div class="opengridjs-contextMenu" style="left:${left}; top: ${top}">
+                        <div class="opengridjs-title">${title}</div><hr/>
+                        ${options.map((option, index) => `<button data-id="${id}" class="opengridjs-context-menu-button ${option.className} opengridjs-btn" data-action="${option.actionFunctionName}">${option.actionName}</button>`).join('')}
                         <br/>&nbsp;
                     </div>`;
 
-                    document.querySelector('.grid-additional').innerHTML += selections;
+                    document.querySelector('.opengridjs-grid-additional').innerHTML += selections;
 
                     // Attach event listeners to each button
-                    document.querySelectorAll('.context-menu-button').forEach(button => {
+                    document.querySelectorAll('.opengridjs-context-menu-button').forEach(button => {
                         button.addEventListener('click', (event) => {
                             const actionFunctionName = event.target.getAttribute('data-action');
                             window[actionFunctionName](this.gridSelectedObject);
@@ -313,8 +316,8 @@ class OpenGrid {
     }
 
     closeContextMenu(action) {
-        document.querySelectorAll('.contextMenu').forEach(item => item.remove());
-        document.querySelectorAll('.selected-grid-row').forEach(item => item.classList.remove('selected-grid-row'));
+        document.querySelectorAll('.opengridjs-contextMenu').forEach(item => item.remove());
+        document.querySelectorAll('.opengridjs-selected-grid-row').forEach(item => item.classList.remove('opengridjs-selected-grid-row'));
         if (action) {
             action(this.gridSelectedObject);
         }

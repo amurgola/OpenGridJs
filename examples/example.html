@@ -1,10 +1,10 @@
 <html>
 <head>
-    <link rel="stylesheet" href="https://unpkg.com/opengridjs@latest/opengrid.min.css">
-    <script src="https://unpkg.com/opengridjs@latest/opengrid.min.js"></script>
+    <link rel="stylesheet" href="../opengrid.css">
+    <script src="../opengrid.js"></script>
 </head>
 <body>
-<div class="grid"></div>
+<div class="dataGrid"></div>
 <script>
     const setup = {
         columnHeaderNames: [
@@ -40,7 +40,7 @@
             .then((jsonData) => grid.appendData(jsonData))
     }
 
-    var grid = new OpenGrid("grid", loadDemoData, 350, setup, loadMoreDemoData);
+    var grid = new OpenGrid("dataGrid", loadDemoData, 350, setup, loadMoreDemoData);
 
     function exampleRow(row) {
         alert("Example row " + row.email);
