@@ -125,9 +125,9 @@ You can find a usage example here: https://codepen.io/amurgola/pen/RweqdMo
 - [X] ~~Color options to control on a row by row level~~ Added formatter
 - [X] Ability to dynamically load data
 - [X] Reloadable Data
+- [X] Render child json data
 - [ ] Drag to move columns
 - [ ] Drag to make columns larger
-- [ ] Render child json data
 
 ## License
 

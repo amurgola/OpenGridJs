@@ -158,7 +158,18 @@ class OpenGrid {
         const gridRow = gridRows.getElementsByClassName(rowClassName)[0];
 
         gridRow.innerHTML = this.headerData.map(header => {
-            let found = rowItem.data[header.data] ?? '&nbsp;';
+            let found = '&nbsp;';
+
+            if(header.data.includes('.')){
+                const keys = header.data.split('.');
+                found = rowItem.data;
+                keys.forEach(key => {
+                    found = found[key];
+                });
+            }else{
+                found = rowItem.data[header.data] ?? '&nbsp;';
+            }
+
             var formatter = header.format;
 
             if (formatter) {
