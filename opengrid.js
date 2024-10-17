@@ -70,44 +70,76 @@ class OpenGrid {
             isRendered: false
         }));
         this.sortData();
+        this.createContextMenu(this.contextMenuItems);
     }
 
-    generateGridHeader(setup) {
+    generateGridHeader(setup, headerDataOverride) {
         const gridHeader = this.rootElement.querySelector(".opengridjs-grid-header");
         gridHeader.setAttribute("data-pos", gridHeader.offsetTop);
 
-        const headers = setup.columnHeaderNames == null
-            ? this.gridColumnNames.map(columnNames => columnNames.headerName)
-            : setup.columnHeaderNames.map(headerName => headerName.columnName);
+        if(!headerDataOverride) {
+            const headers = setup.columnHeaderNames == null
+                ? this.gridColumnNames.map(columnNames => columnNames.headerName)
+                : setup.columnHeaderNames.map(headerName => headerName.columnName);
 
-        const headerData = [];
+            const headerData = [];
 
-        const gridItemWidth = 100 / headers.length;
-        const gridItemWidthStyle = `width:${gridItemWidth}%`;
+            const gridItemWidth = 100 / headers.length;
+            const gridItemWidthStyle = `width:${gridItemWidth}%`;
 
-        if(setup.columnHeaderNames == null){
-            for(let i = 0; i < headers.length; i++){
-                headerData.push({
-                    data: headers[i],
-                    headerName: headers[i],
-                    width: gridItemWidthStyle });
+            if(setup.columnHeaderNames == null){
+                for(let i = 0; i < headers.length; i++){
+                    headerData.push({
+                        data: headers[i],
+                        headerName: headers[i],
+                        width: gridItemWidthStyle });
+                }
+            } else {
+                for(let i = 0; i < setup.columnHeaderNames.length; i++){
+                    headerData.push({
+                        data: setup.columnHeaderNames[i].columnName,
+                        headerName: setup.columnHeaderNames[i].columnNameDisplay ?? setup.columnHeaderNames[i].columnName,
+                        width: setup.columnHeaderNames[i].columnWidth ? `min-width:${setup.columnHeaderNames[i].columnWidth}px` : gridItemWidthStyle,
+                        format: setup.columnHeaderNames[i].format,
+                    });
+                }
             }
-        } else {
-            for(let i = 0; i < setup.columnHeaderNames.length; i++){
-                headerData.push({
-                    data: setup.columnHeaderNames[i].columnName,
-                    headerName: setup.columnHeaderNames[i].columnNameDisplay ?? setup.columnHeaderNames[i].columnName,
-                    width: setup.columnHeaderNames[i].columnWidth ? `min-width:${setup.columnHeaderNames[i].columnWidth}px` : gridItemWidthStyle,
-                    format: setup.columnHeaderNames[i].format,
-                });
-            }
+            this.headerData = headerData;
         }
-        this.headerData = headerData;
 
         gridHeader.innerHTML = this.headerData.map(header =>
-            `<div class='opengridjs-grid-header-item' data-header='${header.data}' style='${header.width}'>${header.headerName}<span class='opengridjs-sort-indicator'></span></div>`
+            `<div class='opengridjs-grid-header-item' draggable="true" data-header='${header.data}' style='${header.width}'>${header.headerName}<span class='opengridjs-sort-indicator'></span></div>`
         ).join('');
 
+        //now find all the header elements and bind ondragenter to dragOver()
+        const headerItems = Array.from(gridHeader.getElementsByClassName('opengridjs-grid-header-item'));
+        var headerOrder = 0;
+        headerItems.forEach(headerItem => {
+            const sortDirection = this.headerData.find(x => x.data == headerItem.getAttribute('data-header')).sortDirection;
+            if(sortDirection) {
+                headerItem.classList.add(sortDirection === 'asc' ? 'opengridjs-sort-asc' : 'opengridjs-sort-desc');
+            }
+
+            headerItem.setAttribute('data-order', headerOrder++);
+            headerItem.addEventListener('dragenter', e => this.dragOver(e));
+        });
+    }
+
+    dragOver(e) {
+        e.preventDefault();
+
+        if(e.relatedTarget && e.relatedTarget.classList.contains('opengridjs-grid-header-item') && !e.target.classList.contains('opengridjs-sort-indicator')) {
+            const relatedTargetOrder = e.relatedTarget.getAttribute('data-order');
+            const currentOrder = e.target.getAttribute('data-order');
+
+            const temp = this.headerData[relatedTargetOrder];
+
+            this.headerData[relatedTargetOrder] = this.headerData[currentOrder];
+            this.headerData[currentOrder] = temp;
+
+            this.generateGridHeader(null, this.headerData);
+            this.rerender();
+        }
     }
 
     generateGridRows() {
@@ -208,7 +240,6 @@ class OpenGrid {
                 this.loadMoreDataFunction();
             }
         });
-        this.createContextMenu(setup.contextMenuOptions);
         this.addHeaderActions();
     }
 
@@ -273,23 +304,34 @@ class OpenGrid {
         if (options) {
             const gridRows = this.rootElement.querySelectorAll('.opengridjs-grid-row');
             gridRows.forEach(gridRow => {
+                if (gridRow.getAttribute('data-has-context-menu') === 'true') {
+                    return;
+                }
+
                 gridRow.addEventListener('contextmenu', e => {
                     e.preventDefault();
                     this.closeContextMenu();
                     gridRow.classList.add('opengridjs-selected-grid-row');
+                    gridRow.setAttribute('data-has-context-menu', 'true');
 
                     const id = gridRow.getAttribute("data-id");
-                    this.gridSelectedObject = this.gridData.find(x => x.data.id == id).data;
+
+                    if(id === "undefined") {
+                        console.error("No Id detected in the selected row");
+                        return;
+                    }
+
+                    this.gridSelectedObject = this.gridData.find(x => x.data.id === id).data;
 
                     const title = this.contextMenuTitle ?? "Title";
                     const left = `${e.pageX}px`;
                     const top = `${e.pageY}px`;
                     const selections = `
-                    <div class="opengridjs-contextMenu" style="left:${left}; top: ${top}">
-                        <div class="opengridjs-title">${title}</div><hr/>
-                        ${options.map((option, index) => `<button data-id="${id}" class="opengridjs-context-menu-button ${option.className} opengridjs-btn" data-action="${option.actionFunctionName}">${option.actionName}</button>`).join('')}
-                        <br/>&nbsp;
-                    </div>`;
+                <div class="opengridjs-contextMenu" style="left:${left}; top: ${top}">
+                    <div class="opengridjs-title">${title}</div><hr/>
+                    ${options.map((option, index) => `<button data-id="${id}" class="opengridjs-context-menu-button ${option.className} opengridjs-btn" data-action="${option.actionFunctionName}">${option.actionName}</button>`).join('')}
+                    <br/>&nbsp;
+                </div>`;
 
                     document.querySelector('.opengridjs-grid-additional').innerHTML += selections;
 
@@ -382,5 +424,4 @@ class OpenGrid {
     stopLoadingMoreData() {
         this.canLoadMoreData = false;
     }
-
 }
