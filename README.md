@@ -37,7 +37,7 @@ Include the `opengrid.js` and `opengrid.css` files in your HTML file, then use t
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <link rel="stylesheet" href="https://unpkg.com/opengridjs/opengrid.min.css">
+        <link rel="stylesheet" href="https://unpkg.com/opengridjs/opengrid.css">
         <script src="https://unpkg.com/opengridjs/opengrid.min.js"></script>
     </head>
         <body>
