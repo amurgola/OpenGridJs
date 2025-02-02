@@ -18,7 +18,7 @@ class OpenGrid {
 
         this.rootElement = document.querySelector(`.${className}`);
         this.rootElement.gridInstance = this;
-        this.rootElement.classList.add('opengridjs-grid'); // Automatically add 'grid' class
+        this.rootElement.classList.add('opengridjs-grid');
 
         if (typeof data === 'function') {
             data().then(fetchedData => {
@@ -55,6 +55,14 @@ class OpenGrid {
         };
     }
 
+    generateGUID() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+            const r = Math.random() * 16 | 0;
+            const v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+
     initGrid() {
         this.rootElement.classList.add("opengridjs-grid-container");
         this.rootElement.innerHTML = `
@@ -64,11 +72,16 @@ class OpenGrid {
     }
 
     processData(data) {
-        this.gridData = data.map((dataItem, currentPosition) => ({
-            data: dataItem,
-            position: currentPosition * this.gridRowPxSize,
-            isRendered: false
-        }));
+        this.gridData = data.map((dataItem, currentPosition) => {
+            if (dataItem.id === undefined || dataItem.id === null || dataItem.id === '') {
+                dataItem.id = this.generateGUID();
+            }
+            return {
+                data: dataItem,
+                position: currentPosition * this.gridRowPxSize,
+                isRendered: false
+            };
+        });
         this.sortData();
         this.createContextMenu(this.contextMenuItems);
     }
@@ -111,7 +124,6 @@ class OpenGrid {
             `<div class='opengridjs-grid-header-item' draggable="true" data-header='${header.data}' style='${header.width}'>${header.headerName}<span class='opengridjs-sort-indicator'></span></div>`
         ).join('');
 
-        //now find all the header elements and bind ondragenter to dragOver()
         const headerItems = Array.from(gridHeader.getElementsByClassName('opengridjs-grid-header-item'));
         var headerOrder = 0;
         headerItems.forEach(headerItem => {
@@ -335,7 +347,6 @@ class OpenGrid {
 
                     document.querySelector('.opengridjs-grid-additional').innerHTML += selections;
 
-                    // Attach event listeners to each button
                     document.querySelectorAll('.opengridjs-context-menu-button').forEach(button => {
                         button.addEventListener('click', (event) => {
                             const actionFunctionName = event.target.getAttribute('data-action');
