@@ -333,7 +333,7 @@ class OpenGrid {
                         return;
                     }
 
-                    this.gridSelectedObject = this.gridData.find(x => x.data.id === id).data;
+                    this.gridSelectedObject = this.gridData.find(x => x.data.id.toString() === id).data;
 
                     const title = this.contextMenuTitle ?? "Title";
                     const left = `${e.pageX}px`;
