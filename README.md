@@ -127,7 +127,7 @@ You can find a usage example here: https://codepen.io/amurgola/pen/RweqdMo
 - [X] Reloadable Data
 - [X] Render child json data
 - [X] Drag to move columns
-- [ ] Drag to make columns larger
+- [X] Drag to make columns larger
 
 ## License
 

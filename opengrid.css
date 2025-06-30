@@ -23,6 +23,7 @@
     flex-grow: 1;
     text-align: left;
     text-transform: capitalize;
+    position: relative;
 }
 
 .opengridjs-grid .opengridjs-grid-rows-container {
@@ -140,4 +141,28 @@
 .opengridjs-grid a {
     color: #007bff;
     text-decoration: none;
+}
+
+.opengridjs-grid .opengridjs-resize-handle {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 4px;
+    height: 100%;
+    cursor: col-resize;
+    background-color: transparent;
+    border-right: 2px solid transparent;
+    transition: border-color 0.2s;
+}
+
+.opengridjs-grid .opengridjs-resize-handle:hover {
+    border-right: 2px solid #007bff;
+}
+
+.opengridjs-grid .opengridjs-grid-header-item.opengridjs-resizing {
+    user-select: none;
+}
+
+.opengridjs-grid .opengridjs-grid-header-item.opengridjs-resizing .opengridjs-resize-handle {
+    border-right: 2px solid #007bff;
 }

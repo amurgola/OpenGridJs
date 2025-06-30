@@ -120,9 +120,12 @@ class OpenGrid {
             this.headerData = headerData;
         }
 
-        gridHeader.innerHTML = this.headerData.map(header =>
-            `<div class='opengridjs-grid-header-item' draggable="true" data-header='${header.data}' style='${header.width}'>${header.headerName}<span class='opengridjs-sort-indicator'></span></div>`
-        ).join('');
+        gridHeader.innerHTML = this.headerData.map(header => {
+            const headerStyle = header.width.includes('min-width') ? 
+                `${header.width}; flex-grow: 0; flex-shrink: 0;` : 
+                header.width;
+            return `<div class='opengridjs-grid-header-item' draggable="true" data-header='${header.data}' style='${headerStyle}'>${header.headerName}<span class='opengridjs-sort-indicator'></span><span class='opengridjs-resize-handle'></span></div>`;
+        }).join('');
 
         const headerItems = Array.from(gridHeader.getElementsByClassName('opengridjs-grid-header-item'));
         var headerOrder = 0;
@@ -134,6 +137,11 @@ class OpenGrid {
 
             headerItem.setAttribute('data-order', headerOrder++);
             headerItem.addEventListener('dragenter', e => this.dragOver(e));
+            
+            const resizeHandle = headerItem.querySelector('.opengridjs-resize-handle');
+            if(resizeHandle) {
+                this.addResizeHandleEvents(resizeHandle, headerItem);
+            }
         });
     }
 
@@ -152,6 +160,72 @@ class OpenGrid {
             this.generateGridHeader(null, this.headerData);
             this.rerender();
         }
+    }
+
+    addResizeHandleEvents(resizeHandle, headerItem) {
+        let isResizing = false;
+        let startX = 0;
+        let startWidth = 0;
+        let headerIndex = 0;
+
+        resizeHandle.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            isResizing = true;
+            startX = e.clientX;
+            startWidth = headerItem.offsetWidth;
+            headerIndex = parseInt(headerItem.getAttribute('data-order'));
+            
+            headerItem.classList.add('opengridjs-resizing');
+            headerItem.setAttribute('draggable', 'false');
+            
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+        });
+
+        const handleMouseMove = (e) => {
+            if (!isResizing) return;
+            
+            const deltaX = e.clientX - startX;
+            const newWidth = Math.max(50, startWidth + deltaX);
+            
+            this.headerData[headerIndex].width = `min-width:${newWidth}px`;
+            headerItem.style.width = `${newWidth}px`;
+            headerItem.style.flexGrow = '0';
+            headerItem.style.flexShrink = '0';
+            
+            this.updateColumnWidths();
+        };
+
+        const handleMouseUp = () => {
+            if (!isResizing) return;
+            
+            isResizing = false;
+            headerItem.classList.remove('opengridjs-resizing');
+            headerItem.setAttribute('draggable', 'true');
+            
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+            
+            this.rerender();
+        };
+    }
+
+    updateColumnWidths() {
+        const gridRows = this.rootElement.querySelectorAll('.opengridjs-grid-row');
+        gridRows.forEach(row => {
+            const columnItems = row.querySelectorAll('.opengridjs-grid-column-item');
+            columnItems.forEach((item, index) => {
+                if (this.headerData[index]) {
+                    item.style.cssText = this.headerData[index].width;
+                    if (this.headerData[index].width.includes('min-width')) {
+                        item.style.flexGrow = '0';
+                        item.style.flexShrink = '0';
+                    }
+                }
+            });
+        });
     }
 
     generateGridRows() {
@@ -220,7 +294,10 @@ class OpenGrid {
                 found = formatter(found);
             }
 
-            return `<div class='opengridjs-grid-column-item' style='${header.width}'>${found}</div>`;
+            const columnStyle = header.width.includes('min-width') ? 
+                `${header.width}; flex-grow: 0; flex-shrink: 0;` : 
+                header.width;
+            return `<div class='opengridjs-grid-column-item' style='${columnStyle}'>${found}</div>`;
         }).join('');
     }
 
