@@ -1,0 +1,52 @@
+name: Minify Assets
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'opengrid.js'
+      - 'opengrid.css'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'opengrid.js'
+      - 'opengrid.css'
+
+jobs:
+  minify:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          
+      - name: Install dependencies
+        run: |
+          npm install -g terser
+          npm install -g clean-css-cli
+          
+      - name: Minify JavaScript
+        run: |
+          terser opengrid.js --compress --mangle --output opengrid.min.js
+          
+      - name: Minify CSS
+        run: |
+          cleancss -o opengrid.min.css opengrid.css
+          
+      - name: Commit minified files
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add opengrid.min.js opengrid.min.css
+          git diff --staged --quiet || git commit -m "Auto-minify assets [skip ci]"
+          
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
