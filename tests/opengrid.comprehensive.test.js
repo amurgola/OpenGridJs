@@ -411,17 +411,17 @@ describe('OpenGrid Feature Completeness', () => {
     const readmeContent = fs.readFileSync(readmePath, 'utf8');
     
     // Virtual scrolling
-    expect(readmeContent).toContain('Virtual scrolling');
+    expect(readmeContent).toContain('Virtual Scrolling');
     expect(openGridSource).toContain('renderVisible');
     expect(openGridSource).toContain('isRendered');
     
     // Customizable column headers
-    expect(readmeContent).toContain('column headers');
+    expect(readmeContent).toContain('Custom Headers');
     expect(openGridSource).toContain('columnHeaderNames');
     expect(openGridSource).toContain('columnNameDisplay');
     
     // Context menus
-    expect(readmeContent).toContain('Context menus');
+    expect(readmeContent).toContain('Context Menus');
     expect(openGridSource).toContain('contextMenuOptions');
     expect(openGridSource).toContain('contextmenu');
   });

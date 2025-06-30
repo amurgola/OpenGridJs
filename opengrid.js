@@ -121,11 +121,15 @@ class OpenGrid {
         }
 
         gridHeader.innerHTML = this.headerData.map(header => {
-            const headerStyle = header.width.includes('min-width') ? 
+            if (!header || !header.width) {
+                console.warn('Invalid header data:', header);
+                return '';
+            }
+            const headerStyle = (header.width.includes('min-width') || header.width.includes('width:')) ? 
                 `${header.width}; flex-grow: 0; flex-shrink: 0;` : 
                 header.width;
             return `<div class='opengridjs-grid-header-item' draggable="true" data-header='${header.data}' style='${headerStyle}'>${header.headerName}<span class='opengridjs-sort-indicator'></span><span class='opengridjs-resize-handle'></span></div>`;
-        }).join('');
+        }).filter(html => html !== '').join('');
 
         const headerItems = Array.from(gridHeader.getElementsByClassName('opengridjs-grid-header-item'));
         var headerOrder = 0;
@@ -149,11 +153,18 @@ class OpenGrid {
         e.preventDefault();
 
         if(e.relatedTarget && e.relatedTarget.classList.contains('opengridjs-grid-header-item') && !e.target.classList.contains('opengridjs-sort-indicator')) {
-            const relatedTargetOrder = e.relatedTarget.getAttribute('data-order');
-            const currentOrder = e.target.getAttribute('data-order');
+            const relatedTargetOrder = parseInt(e.relatedTarget.getAttribute('data-order'));
+            const currentOrder = parseInt(e.target.getAttribute('data-order'));
+
+            // Validate indices
+            if (isNaN(relatedTargetOrder) || isNaN(currentOrder) || 
+                relatedTargetOrder < 0 || currentOrder < 0 ||
+                relatedTargetOrder >= this.headerData.length || currentOrder >= this.headerData.length ||
+                !this.headerData[relatedTargetOrder] || !this.headerData[currentOrder]) {
+                return;
+            }
 
             const temp = this.headerData[relatedTargetOrder];
-
             this.headerData[relatedTargetOrder] = this.headerData[currentOrder];
             this.headerData[currentOrder] = temp;
 
@@ -182,6 +193,12 @@ class OpenGrid {
             
             document.addEventListener('mousemove', handleMouseMove);
             document.addEventListener('mouseup', handleMouseUp);
+        });
+
+        resizeHandle.addEventListener('dblclick', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.autoResizeColumns();
         });
 
         const handleMouseMove = (e) => {
@@ -219,13 +236,33 @@ class OpenGrid {
             columnItems.forEach((item, index) => {
                 if (this.headerData[index]) {
                     item.style.cssText = this.headerData[index].width;
-                    if (this.headerData[index].width.includes('min-width')) {
+                    if (this.headerData[index].width.includes('min-width') || this.headerData[index].width.includes('width:')) {
                         item.style.flexGrow = '0';
                         item.style.flexShrink = '0';
                     }
                 }
             });
         });
+    }
+
+    autoResizeColumns() {
+        const gridHeader = this.rootElement.querySelector('.opengridjs-grid-header');
+        if (!gridHeader) return;
+
+        const containerWidth = gridHeader.offsetWidth;
+        const columnCount = this.headerData.length;
+        const equalWidth = Math.floor(containerWidth / columnCount);
+
+        // Reset all columns to equal width
+        this.headerData.forEach((header, index) => {
+            if (header) {
+                header.width = `width:${equalWidth}px`;
+            }
+        });
+
+        // Re-render the grid with new column widths
+        this.generateGridHeader(null, this.headerData);
+        this.rerender();
     }
 
     generateGridRows() {
@@ -294,7 +331,7 @@ class OpenGrid {
                 found = formatter(found);
             }
 
-            const columnStyle = header.width.includes('min-width') ? 
+            const columnStyle = (header.width.includes('min-width') || header.width.includes('width:')) ? 
                 `${header.width}; flex-grow: 0; flex-shrink: 0;` : 
                 header.width;
             return `<div class='opengridjs-grid-column-item' style='${columnStyle}'>${found}</div>`;
