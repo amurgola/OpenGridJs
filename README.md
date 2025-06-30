@@ -1,134 +1,320 @@
-﻿# OpenGridJs
- 
-Opengrid.js is an open-source lightweight JavaScript grid framework that allows you to create fast and easy-to-use data grids in your web application. It supports virtual scrolling, custom column headers, and context menus.
+# OpenGridJs
 
-## Features
+A lightweight, high-performance JavaScript grid framework for modern web applications. OpenGridJs delivers fast, responsive data grids with virtual scrolling, advanced column management, and extensive customization options.
 
-- Virtual scrolling for optimized rendering and performance
-- Customizable column headers
-- Context menus with configurable actions
-- Lightweight and easy to integrate
-- Compatible with modern browsers
+[![npm version](https://img.shields.io/npm/v/opengridjs.svg)](https://www.npmjs.com/package/opengridjs)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## Installation
-## NPM
-To install via NPM, use the following command:
+## ✨ Features
 
-```bash 
-npm i opengridjs
+### Performance & Scalability
+- **Virtual Scrolling**: Efficiently handles large datasets by rendering only visible rows
+- **Lightweight**: Minimal footprint with no external dependencies
+- **Optimized Rendering**: Smart DOM updates for smooth scrolling and interactions
+
+### Column Management
+- **Auto-Detection**: Automatically generates columns from data structure
+- **Custom Headers**: Define custom column names, display names, and formatting
+- **Drag & Drop Reordering**: Intuitive column reordering via drag and drop
+- **Resizable Columns**: Interactive column resizing with visual feedback
+- **Flexible Widths**: Support for both percentage and pixel-based column sizing
+
+### Data Handling
+- **Asynchronous Loading**: Promise-based data loading with loading states
+- **Infinite Scrolling**: Load more data automatically as users scroll
+- **Dynamic Updates**: Append, filter, and refresh data without full re-renders
+- **GUID Generation**: Automatic ID assignment for data items without identifiers
+
+### User Interactions
+- **Sorting**: Click-to-sort columns with visual indicators
+- **Filtering**: Built-in search and filter capabilities
+- **Context Menus**: Configurable right-click context menus
+- **CSV Export**: Export grid data to CSV format
+- **Row Selection**: Single and multi-row selection support
+
+### Developer Experience
+- **TypeScript Ready**: Full TypeScript support with type definitions
+- **Modern Browsers**: Compatible with all modern browsers
+- **Easy Integration**: Simple API with minimal setup required
+- **Extensible**: Flexible configuration and customization options
+
+## 📦 Installation
+
+### NPM
+```bash
+npm install opengridjs
 ```
 
-## CDN
-To use via CDN, include the following URLs in your HTML file:
-
-```html 
+### CDN
+```html
 <link rel="stylesheet" href="https://unpkg.com/opengridjs@latest/opengrid.min.css">
 <script src="https://unpkg.com/opengridjs@latest/opengrid.min.js"></script>
 ```
-    
-## Usage
 
-Include the `opengrid.js` and `opengrid.css` files in your HTML file, then use the below as an example of how to use the grid. The setup object is optional and can be used to customize the grid. The setup object can be used to define the column headers, context menu, and context menu actions.
+### Direct Download
+Download the latest release from the [GitHub releases page](https://github.com/amurgola/OpenGridJs/releases).
 
-## Demo
-![](https://github.com/amurgola/OpenGridJs/blob/main/Demo.gif)
+## 🚀 Quick Start
 
-```javascript
+```html
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <link rel="stylesheet" href="https://unpkg.com/opengridjs/opengrid.css">
-        <script src="https://unpkg.com/opengridjs/opengrid.min.js"></script>
-    </head>
-        <body>
-            <div class="grid"></div>
-            <script>
-                const setup = {
-                    columnHeaderNames: [
-                        {
-                            columnName: "name",
-                            columnNameDisplay: "Full Name",
-                        },
-                        { columnName: "phoneNumber" },
-                        {
-                            columnName: "email",
-                            columnNameDisplay: "Email",
-                            format: function (value) {
-                                return "<a href='mailto:" + value + "'>" + value + "</a>";
-                            },
-                        },
-                    ],
-                    contextMenuTitle: "Context Title",
-                    contextMenuOptions: [
-                        {
-                            actionName: "Example",
-                            actionFunctionName: "exampleRow",
-                            className: "example-row",
-                        }
-                    ],
-                };
-            
-                function loadDemoData() {
-                    return fetch("https://lumabyte.com/api/generateMockRandomPeople?count=100")
-                        .then((response) => response.json());
-                }
-            
-                var grid = new OpenGrid("grid", loadDemoData, 350, setup, loadMore);
-            
-                function loadMore() {
-                    grid.appendData(loadDemoData);
-                }
-            
-                function exampleRow(row) {
-                    alert("Example row " + row.email);
-                }
-            </script>
-        </body>
+<head>
+    <link rel="stylesheet" href="https://unpkg.com/opengridjs/opengrid.min.css">
+    <script src="https://unpkg.com/opengridjs/opengrid.min.js"></script>
+</head>
+<body>
+    <div id="myGrid"></div>
+    
+    <script>
+        // Sample data
+        const sampleData = [
+            { id: 1, name: "John Doe", email: "john@example.com", age: 30 },
+            { id: 2, name: "Jane Smith", email: "jane@example.com", age: 25 },
+            { id: 3, name: "Bob Johnson", email: "bob@example.com", age: 35 }
+        ];
+
+        // Initialize grid
+        const grid = new OpenGrid("myGrid", sampleData, 400);
+    </script>
+</body>
 </html>
 ```
 
-#### Constructor Parameters
-- `className`: The class name of the container where the grid will be rendered.
-- `data`: The initial set of data to be displayed. This can be an array of objects or a function returning a promise for asynchronous data loading.
-- `gridHeight`: The height of the grid in pixels.
-- `setup`: An object containing configurations such as column headers and context menu settings.
-- `loadMoreDataFunction`: An optional function that will be called to load more data (useful for implementing infinite scrolling).
+## 📊 Demo
 
-#### Setup Object
-The setup object allows you to customize the grid's appearance and behavior. It supports the following properties:
+![OpenGridJs Demo](https://github.com/amurgola/OpenGridJs/blob/main/Demo.gif)
 
-- `columnHeaderNames`: An array of objects defining the columns of the grid. Each object can specify columnName, columnNameDisplay, and format (a function to format the cell value).
-- `contextMenuTitle`: A string defining the title of the context menu.
-- `contextMenuOptions`: An array of objects defining the context menu options. Each option can specify actionName, actionFunctionName, and className.
+[Live Demo on CodePen](https://codepen.io/amurgola/pen/RweqdMo)
 
-#### Methods
-The setup object allows you to customize the grid's appearance and behavior. It supports the following properties:
+## 🔧 Configuration
 
-- `appendData(data)`: Appends new data to the grid.
-- `rerender()`: Rerenders the grid. Useful if the data or configuration changes.
-- `reset()`: Resets the grid to its initial state.
-- `exportToCSV()`: Exports the current grid data to a CSV file.
-- `searchFilter(term)`: Filters the grid data based on the search term.
-- `stopLoadingMoreData()`: Stops the grid from calling the loadMoreDataFunction.
+### Constructor Parameters
 
+```javascript
+new OpenGrid(containerId, data, height, setup, loadMoreFunction)
+```
 
-You can find a usage example here: https://codepen.io/amurgola/pen/RweqdMo
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `containerId` | string | ✅ | ID of the container element |
+| `data` | Array/Function | ✅ | Initial data or async loading function |
+| `height` | number | ✅ | Grid height in pixels |
+| `setup` | Object | ❌ | Configuration options |
+| `loadMoreFunction` | Function | ❌ | Function for infinite scrolling |
 
-## Todo list
-- [X] Click to sort columns
-- [X] Better column size handling
-- [X] Ability to auto define headers based on json context
-- [X] More options to define exact column width
-- [X] Filter
-- [X] Sort visualization
-- [x] Ability to export to csv
-- [X] ~~Color options to control on a row by row level~~ Added formatter
-- [X] Ability to dynamically load data
-- [X] Reloadable Data
-- [X] Render child json data
-- [X] Drag to move columns
-- [X] Drag to make columns larger
+### Setup Object
 
-## License
+```javascript
+const setup = {
+    columnHeaderNames: [
+        {
+            columnName: "name",
+            columnNameDisplay: "Full Name",
+            columnWidth: "200px", // Optional: specific width
+            format: (value) => value.toUpperCase() // Optional: custom formatter
+        }
+    ],
+    contextMenuTitle: "Actions",
+    contextMenuOptions: [
+        {
+            actionName: "Edit",
+            actionFunctionName: "editRow",
+            className: "edit-action"
+        },
+        {
+            actionName: "Delete", 
+            actionFunctionName: "deleteRow",
+            className: "delete-action"
+        }
+    ]
+};
+```
 
-Opengridjs is released under the MIT License.
+#### Column Configuration
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `columnName` | string | Data field name |
+| `columnNameDisplay` | string | Display name in header |
+| `columnWidth` | string | CSS width value (e.g., "200px", "20%") |
+| `format` | function | Custom formatting function |
+
+#### Context Menu Configuration
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `actionName` | string | Display text for menu item |
+| `actionFunctionName` | string | Global function name to call |
+| `className` | string | CSS class for styling |
+
+## 🎯 Advanced Usage
+
+### Asynchronous Data Loading
+
+```javascript
+async function loadData() {
+    const response = await fetch('/api/data');
+    return response.json();
+}
+
+const grid = new OpenGrid("myGrid", loadData, 400, setup);
+```
+
+### Infinite Scrolling
+
+```javascript
+async function loadMoreData() {
+    const response = await fetch(`/api/data?page=${currentPage++}`);
+    const newData = await response.json();
+    grid.appendData(newData);
+}
+
+const grid = new OpenGrid("myGrid", loadData, 400, setup, loadMoreData);
+```
+
+### Custom Formatting
+
+```javascript
+const setup = {
+    columnHeaderNames: [
+        {
+            columnName: "price",
+            columnNameDisplay: "Price",
+            format: (value) => `$${value.toFixed(2)}`
+        },
+        {
+            columnName: "date",
+            columnNameDisplay: "Created",
+            format: (value) => new Date(value).toLocaleDateString()
+        },
+        {
+            columnName: "email",
+            columnNameDisplay: "Email",
+            format: (value) => `<a href="mailto:${value}">${value}</a>`
+        }
+    ]
+};
+```
+
+## 🛠️ API Reference
+
+### Methods
+
+| Method | Parameters | Description |
+|--------|------------|-------------|
+| `appendData(data)` | Array | Add new data to the grid |
+| `rerender()` | none | Force grid re-render |
+| `reset()` | none | Reset grid to initial state |
+| `exportToCSV()` | none | Download grid data as CSV |
+| `searchFilter(term)` | string | Filter data by search term |
+| `stopLoadingMoreData()` | none | Disable infinite scrolling |
+
+### Usage Examples
+
+```javascript
+// Add new data
+grid.appendData([
+    { id: 4, name: "Alice Brown", email: "alice@example.com", age: 28 }
+]);
+
+// Filter data
+grid.searchFilter("john");
+
+// Export to CSV
+grid.exportToCSV();
+
+// Reset grid
+grid.reset();
+```
+
+## 🎨 Styling & Theming
+
+OpenGridJs provides extensive CSS customization options:
+
+```css
+/* Custom theme example */
+.opengridjs-grid {
+    --primary-color: #007bff;
+    --background-color: #ffffff;
+    --border-color: #dee2e6;
+    --hover-color: #f8f9fa;
+    --selected-color: #e3f2fd;
+}
+
+.opengridjs-grid-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.opengridjs-grid-row:hover {
+    background-color: var(--hover-color);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+```
+
+## 🧪 Testing
+
+OpenGridJs includes comprehensive test coverage:
+
+```bash
+# Run tests
+npm test
+
+# Run tests with coverage
+npm run test:coverage
+
+# Watch mode
+npm run test:watch
+```
+
+## 🏗️ Development
+
+```bash
+# Clone repository
+git clone https://github.com/amurgola/OpenGridJs.git
+cd OpenGridJs
+
+# Install dependencies
+npm install
+
+# Run tests
+npm test
+
+# Build minified versions
+npm run build
+```
+
+## 🤝 Contributing
+
+Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📋 Browser Support
+
+| Browser | Version |
+|---------|---------|
+| Chrome | ≥ 60 |
+| Firefox | ≥ 55 |
+| Safari | ≥ 12 |
+| Edge | ≥ 79 |
+
+## 📄 License
+
+OpenGridJs is released under the [MIT License](LICENSE).
+
+## 🙏 Acknowledgments
+
+- Built with performance and developer experience in mind
+- Inspired by modern data grid requirements
+- Community feedback and contributions
+
+---
+
+Made with ❤️ by the OpenGridJs team
