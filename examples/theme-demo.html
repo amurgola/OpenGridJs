@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenGrid Theme Demo</title>
+    <link rel="stylesheet" href="../src/opengrid.css">
+    <script src="../src/opengrid.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            margin: 0;
+            padding: 24px;
+            background-color: var(--bg-color, #f8f9fa);
+            color: var(--text-color, #1a1a1a);
+            transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+        }
+
+        [data-theme="dark"] body {
+            --bg-color: #0f0f0f;
+            --text-color: #ffffff;
+        }
+
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .demo-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .demo-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0 0 16px 0;
+            background: linear-gradient(135deg, #0ea5e9, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .demo-header p {
+            font-size: 1.1rem;
+            opacity: 0.8;
+            margin: 0;
+        }
+
+        .theme-controls {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+
+        .theme-btn {
+            padding: 12px 24px;
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            background: white;
+            color: #1a1a1a;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.15s ease-in-out;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .theme-btn:hover {
+            border-color: #0ea5e9;
+            background: #f0f9ff;
+        }
+
+        .theme-btn.active {
+            background: #0ea5e9;
+            color: white;
+            border-color: #0ea5e9;
+        }
+
+        [data-theme="dark"] .theme-btn {
+            background: #262626;
+            color: white;
+            border-color: #404040;
+        }
+
+        [data-theme="dark"] .theme-btn:hover {
+            border-color: #3b82f6;
+            background: #1e3a8a;
+        }
+
+        [data-theme="dark"] .theme-btn.active {
+            background: #3b82f6;
+            border-color: #3b82f6;
+        }
+
+        .grid-container {
+            margin-bottom: 32px;
+        }
+
+        .grid-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .dataGrid {
+            height: 400px;
+            margin-bottom: 24px;
+        }
+
+        .feature-showcase {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-top: 32px;
+        }
+
+        .feature-card {
+            padding: 24px;
+            border: 1px solid #e1e5e9;
+            border-radius: 12px;
+            background: white;
+            transition: all 0.15s ease-in-out;
+        }
+
+        .feature-card:hover {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
+        }
+
+        [data-theme="dark"] .feature-card {
+            background: #1a1a1a;
+            border-color: #404040;
+        }
+
+        .feature-card h3 {
+            margin: 0 0 12px 0;
+            color: #0ea5e9;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        [data-theme="dark"] .feature-card h3 {
+            color: #3b82f6;
+        }
+
+        .feature-card p {
+            margin: 0;
+            opacity: 0.8;
+            line-height: 1.6;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) body {
+                --bg-color: #0f0f0f;
+                --text-color: #ffffff;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <header class="demo-header">
+            <h1>OpenGrid Theme Demo</h1>
+            <p>Modern, clean data grid with beautiful dark and light themes</p>
+        </header>
+
+        <div class="theme-controls">
+            <button class="theme-btn" onclick="setTheme('auto')" id="auto-btn">
+                🌓 Auto (System)
+            </button>
+            <button class="theme-btn active" onclick="setTheme('light')" id="light-btn">
+                ☀️ Light Mode
+            </button>
+            <button class="theme-btn" onclick="setTheme('dark')" id="dark-btn">
+                🌙 Dark Mode
+            </button>
+        </div>
+
+        <div class="grid-container">
+            <h2 class="grid-title">Sample Data Grid</h2>
+            <div class="dataGrid"></div>
+        </div>
+
+        <div class="feature-showcase">
+            <div class="feature-card">
+                <h3>🎨 Modern Design</h3>
+                <p>Clean, modern interface inspired by OpenAI's design language with subtle shadows, smooth transitions, and perfect typography.</p>
+            </div>
+            <div class="feature-card">
+                <h3>🌙 Dark/Light Themes</h3>
+                <p>Automatic theme detection based on system preferences, plus manual override options for both dark and light modes.</p>
+            </div>
+            <div class="feature-card">
+                <h3>⚡ High Performance</h3>
+                <p>Virtual scrolling, optimized rendering, and hardware-accelerated transitions ensure smooth performance with large datasets.</p>
+            </div>
+            <div class="feature-card">
+                <h3>♿ Accessibility</h3>
+                <p>Full keyboard navigation, focus indicators, high contrast support, and reduced motion preferences respected.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data for the grid
+        const sampleData = [
+            { id: 1, name: "Alice Johnson", email: "alice@example.com", role: "Designer", status: "Active", joinDate: "2023-01-15" },
+            { id: 2, name: "Bob Smith", email: "bob@example.com", role: "Developer", status: "Active", joinDate: "2023-02-20" },
+            { id: 3, name: "Carol Williams", email: "carol@example.com", role: "Manager", status: "Away", joinDate: "2022-11-10" },
+            { id: 4, name: "David Brown", email: "david@example.com", role: "Analyst", status: "Active", joinDate: "2023-03-05" },
+            { id: 5, name: "Emma Davis", email: "emma@example.com", role: "Designer", status: "Active", joinDate: "2023-01-28" },
+            { id: 6, name: "Frank Wilson", email: "frank@example.com", role: "Developer", status: "Inactive", joinDate: "2022-12-12" },
+            { id: 7, name: "Grace Lee", email: "grace@example.com", role: "Product Manager", status: "Active", joinDate: "2023-02-14" },
+            { id: 8, name: "Henry Chen", email: "henry@example.com", role: "Developer", status: "Active", joinDate: "2023-03-20" },
+            { id: 9, name: "Ivy Martinez", email: "ivy@example.com", role: "Designer", status: "Away", joinDate: "2022-10-30" },
+            { id: 10, name: "Jack Thompson", email: "jack@example.com", role: "Analyst", status: "Active", joinDate: "2023-01-08" },
+            { id: 11, name: "Kate Anderson", email: "kate@example.com", role: "Manager", status: "Active", joinDate: "2022-09-15" },
+            { id: 12, name: "Liam Garcia", email: "liam@example.com", role: "Developer", status: "Active", joinDate: "2023-03-12" },
+            { id: 13, name: "Mia Rodriguez", email: "mia@example.com", role: "Designer", status: "Inactive", joinDate: "2022-08-20" },
+            { id: 14, name: "Noah Taylor", email: "noah@example.com", role: "Product Manager", status: "Active", joinDate: "2023-02-28" },
+            { id: 15, name: "Olivia White", email: "olivia@example.com", role: "Analyst", status: "Active", joinDate: "2023-03-15" }
+        ];
+
+        // Grid setup
+        const setup = {
+            columnHeaderNames: [
+                { columnName: "name", columnNameDisplay: "Full Name" },
+                { columnName: "email", columnNameDisplay: "Email", format: (value) => `<a href="mailto:${value}">${value}</a>` },
+                { columnName: "role", columnNameDisplay: "Role" },
+                { columnName: "status", columnNameDisplay: "Status", format: (value) => {
+                    const colors = {
+                        'Active': '#22c55e',
+                        'Away': '#f59e0b', 
+                        'Inactive': '#ef4444'
+                    };
+                    return `<span style="display: inline-flex; align-items: center; gap: 6px;">
+                        <span style="width: 8px; height: 8px; border-radius: 50%; background-color: ${colors[value] || '#6b7280'};"></span>
+                        ${value}
+                    </span>`;
+                }},
+                { columnName: "joinDate", columnNameDisplay: "Join Date", format: (value) => new Date(value).toLocaleDateString() }
+            ],
+            contextMenuTitle: "Actions",
+            contextMenuOptions: [
+                { actionName: "View Profile", actionFunctionName: "viewProfile", className: "view-action" },
+                { actionName: "Edit User", actionFunctionName: "editUser", className: "edit-action" },
+                { actionName: "Delete User", actionFunctionName: "deleteUser", className: "delete-action" }
+            ]
+        };
+
+        // Initialize grid
+        const grid = new OpenGrid("dataGrid", sampleData, 400, setup);
+
+        // Context menu functions
+        function viewProfile(row) {
+            alert(`Viewing profile for ${row.name}`);
+        }
+
+        function editUser(row) {
+            alert(`Editing user ${row.name}`);
+        }
+
+        function deleteUser(row) {
+            if (confirm(`Are you sure you want to delete ${row.name}?`)) {
+                alert(`Deleted user ${row.name}`);
+            }
+        }
+
+        // Theme management
+        let currentTheme = 'light';
+
+        function setTheme(theme) {
+            currentTheme = theme;
+            
+            // Update button states
+            document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`${theme}-btn`).classList.add('active');
+            
+            // Apply theme
+            if (theme === 'auto') {
+                document.documentElement.removeAttribute('data-theme');
+            } else {
+                document.documentElement.setAttribute('data-theme', theme);
+            }
+            
+            // Store preference
+            localStorage.setItem('opengrid-theme', theme);
+        }
+
+        // Initialize theme from localStorage or system preference
+        function initTheme() {
+            const savedTheme = localStorage.getItem('opengrid-theme');
+            if (savedTheme) {
+                setTheme(savedTheme);
+            } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                setTheme('auto');
+                document.getElementById('auto-btn').classList.add('active');
+                document.getElementById('light-btn').classList.remove('active');
+            }
+        }
+
+        // Listen for system theme changes
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+            if (currentTheme === 'auto') {
+                // Trigger a re-render by briefly removing and re-adding the attribute
+                document.documentElement.removeAttribute('data-theme');
+            }
+        });
+
+        // Initialize theme on page load
+        initTheme();
+    </script>
+</body>
+</html>

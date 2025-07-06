@@ -178,6 +178,7 @@ class OpenGrid {
         let startX = 0;
         let startWidth = 0;
         let headerIndex = 0;
+        let wasResizing = false;
 
         resizeHandle.addEventListener('mousedown', (e) => {
             e.preventDefault();
@@ -218,6 +219,7 @@ class OpenGrid {
         const handleMouseUp = () => {
             if (!isResizing) return;
             
+            wasResizing = true;
             isResizing = false;
             headerItem.classList.remove('opengridjs-resizing');
             headerItem.setAttribute('draggable', 'true');
@@ -226,7 +228,15 @@ class OpenGrid {
             document.removeEventListener('mouseup', handleMouseUp);
             
             this.rerender();
+            
+            // Reset the flag after a short delay to prevent sort trigger
+            setTimeout(() => {
+                wasResizing = false;
+            }, 10);
         };
+        
+        // Store reference to wasResizing flag on the header item
+        headerItem._wasResizing = () => wasResizing;
     }
 
     updateColumnWidths() {
@@ -372,6 +382,12 @@ class OpenGrid {
     addHeaderActions() {
         const gridHeader = this.rootElement.querySelector(".opengridjs-grid-header");
         gridHeader.addEventListener('click', e => {
+            // Check if this click is from a resize operation
+            const headerItem = e.target.closest('.opengridjs-grid-header-item');
+            if (headerItem && headerItem._wasResizing && headerItem._wasResizing()) {
+                return; // Don't sort if we just finished resizing
+            }
+            
             const header = e.target.getAttribute("data-header");
             const headerData = this.headerData.find(x => x.data == header);
 
@@ -450,8 +466,12 @@ class OpenGrid {
                     this.gridSelectedObject = this.gridData.find(x => x.data.id.toString() === id).data;
 
                     const title = this.contextMenuTitle ?? "Title";
-                    const left = `${e.pageX}px`;
-                    const top = `${e.pageY}px`;
+                    
+                    // Get the grid container's position relative to the viewport
+                    const gridRect = this.rootElement.getBoundingClientRect();
+                    const left = `${e.clientX - gridRect.left}px`;
+                    const top = `${e.clientY - gridRect.top}px`;
+                    
                     const selections = `
                 <div class="opengridjs-contextMenu" style="left:${left}; top: ${top}">
                     <div class="opengridjs-title">${title}</div><hr/>

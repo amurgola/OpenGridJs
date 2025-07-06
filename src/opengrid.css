@@ -1,168 +1,466 @@
-.opengridjs-grid {
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    font-size: 14px;
-    user-select: none;
-    display: flex;
-    flex-direction: column;
-    background-color: #f8f9fa;
-    border-radius: 4px;
-    overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+/* OpenGrid CSS - Modern Clean Theme with Dark/Light Mode Support */
+
+/* CSS Variables for Theme Management */
+:root {
+  /* Light Mode Colors */
+  --og-background: #ffffff;
+  --og-surface: #f8f9fa;
+  --og-surface-hover: #e9ecef;
+  --og-border: #e1e5e9;
+  --og-text-primary: #1a1a1a;
+  --og-text-secondary: #6b7280;
+  --og-text-muted: #9ca3af;
+  --og-header-bg: #ffffff;
+  --og-header-border: #e1e5e9;
+  --og-selected: #f0f9ff;
+  --og-selected-border: #0ea5e9;
+  --og-accent: #0ea5e9;
+  --og-accent-hover: #0284c7;
+  --og-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.1);
+  --og-shadow-hover: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
+  --og-scrollbar-track: #f1f5f9;
+  --og-scrollbar-thumb: #cbd5e1;
+  --og-scrollbar-thumb-hover: #94a3b8;
+  --og-context-bg: #ffffff;
+  --og-context-border: #e1e5e9;
+  --og-context-hover: #f8f9fa;
+  --og-resize-handle: #cbd5e1;
+  --og-resize-handle-hover: #0ea5e9;
+  
+  /* Typography */
+  --og-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  --og-font-size: 14px;
+  --og-font-weight-normal: 400;
+  --og-font-weight-medium: 500;
+  --og-font-weight-semibold: 600;
+  --og-line-height: 1.5;
+  
+  /* Spacing */
+  --og-spacing-xs: 4px;
+  --og-spacing-sm: 8px;
+  --og-spacing-md: 12px;
+  --og-spacing-lg: 16px;
+  --og-spacing-xl: 24px;
+  
+  /* Border Radius */
+  --og-radius-sm: 4px;
+  --og-radius-md: 8px;
+  --og-radius-lg: 12px;
+  
+  /* Transitions */
+  --og-transition: all 0.15s ease-in-out;
+  --og-transition-fast: all 0.1s ease-in-out;
 }
 
+/* Dark Mode Theme */
+[data-theme="dark"] {
+  --og-background: #1a1a1a;
+  --og-surface: #262626;
+  --og-surface-hover: #404040;
+  --og-border: #404040;
+  --og-text-primary: #ffffff;
+  --og-text-secondary: #a3a3a3;
+  --og-text-muted: #737373;
+  --og-header-bg: #1a1a1a;
+  --og-header-border: #404040;
+  --og-selected: #1e3a8a;
+  --og-selected-border: #3b82f6;
+  --og-accent: #3b82f6;
+  --og-accent-hover: #2563eb;
+  --og-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.4);
+  --og-shadow-hover: 0 4px 6px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
+  --og-scrollbar-track: #262626;
+  --og-scrollbar-thumb: #525252;
+  --og-scrollbar-thumb-hover: #737373;
+  --og-context-bg: #1a1a1a;
+  --og-context-border: #404040;
+  --og-context-hover: #262626;
+  --og-resize-handle: #525252;
+  --og-resize-handle-hover: #3b82f6;
+}
+
+/* Auto Dark Mode based on system preference */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --og-background: #1a1a1a;
+    --og-surface: #262626;
+    --og-surface-hover: #404040;
+    --og-border: #404040;
+    --og-text-primary: #ffffff;
+    --og-text-secondary: #a3a3a3;
+    --og-text-muted: #737373;
+    --og-header-bg: #1a1a1a;
+    --og-header-border: #404040;
+    --og-selected: #1e3a8a;
+    --og-selected-border: #3b82f6;
+    --og-accent: #3b82f6;
+    --og-accent-hover: #2563eb;
+    --og-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.4);
+    --og-shadow-hover: 0 4px 6px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
+    --og-scrollbar-track: #262626;
+    --og-scrollbar-thumb: #525252;
+    --og-scrollbar-thumb-hover: #737373;
+    --og-context-bg: #1a1a1a;
+    --og-context-border: #404040;
+    --og-context-hover: #262626;
+    --og-resize-handle: #525252;
+    --og-resize-handle-hover: #3b82f6;
+  }
+}
+
+/* Main Grid Container */
+.opengridjs-grid {
+  font-family: var(--og-font-family);
+  font-size: var(--og-font-size);
+  font-weight: var(--og-font-weight-normal);
+  line-height: var(--og-line-height);
+  color: var(--og-text-primary);
+  background-color: var(--og-background);
+  border: 1px solid var(--og-border);
+  border-radius: var(--og-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--og-shadow);
+  transition: var(--og-transition);
+  user-select: none;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.opengridjs-grid:hover {
+  box-shadow: var(--og-shadow-hover);
+}
+
+/* Grid Header */
 .opengridjs-grid .opengridjs-grid-header {
-    display: flex;
-    font-weight: 500;
-    background-color: #343a40;
-    color: #ffffff;
-    padding: 10px;
-    cursor: pointer;
+  display: flex;
+  background-color: var(--og-header-bg);
+  border-bottom: 1px solid var(--og-header-border);
+  padding: 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .opengridjs-grid .opengridjs-grid-header-item {
-    flex-grow: 1;
-    text-align: left;
-    text-transform: capitalize;
-    position: relative;
+  flex-grow: 1;
+  padding: var(--og-spacing-lg);
+  font-weight: var(--og-font-weight-semibold);
+  color: var(--og-text-primary);
+  border-right: 1px solid var(--og-border);
+  cursor: pointer;
+  transition: var(--og-transition);
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 35px;
+  text-transform: none;
 }
 
+.opengridjs-grid .opengridjs-grid-header-item:last-child {
+  border-right: none;
+}
+
+.opengridjs-grid .opengridjs-grid-header-item:hover {
+  background-color: var(--og-surface-hover);
+}
+
+.opengridjs-grid .opengridjs-grid-header-item:active {
+  background-color: var(--og-surface);
+}
+
+/* Grid Rows Container */
 .opengridjs-grid .opengridjs-grid-rows-container {
-    overflow-y: scroll;
-    overflow-x: hidden;
-    position: relative;
-    flex-grow: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+  flex-grow: 1;
+  background-color: var(--og-background);
+  min-height: 200px;
 }
 
+/* Grid Rows */
 .opengridjs-grid .opengridjs-grid-row {
-    display: flex;
-    background-color: #ffffff;
-    padding: 10px;
-    align-items: center;
-    position: absolute;
-    width: 100%;
-    box-sizing: border-box;
-    cursor: pointer;
-    transition: background-color 0.3s, transform 0.3s;
-}
-
-.opengridjs-grid .opengridjs-grid-row:nth-child(even) {
-    background-color: #f8f9fa;
+  display: flex;
+  background-color: var(--og-background);
+  border-bottom: 1px solid var(--og-border);
+  padding: 0;
+  align-items: center;
+  position: absolute;
+  width: 100%;
+  box-sizing: border-box;
+  cursor: pointer;
+  transition: var(--og-transition-fast);
+  min-height: 35px;
 }
 
 .opengridjs-grid .opengridjs-grid-row:hover {
-    background-color: #e9ecef;
+  background-color: var(--og-surface-hover);
+}
+
+.opengridjs-grid .opengridjs-grid-row:nth-child(even) {
+  background-color: var(--og-surface);
+}
+
+.opengridjs-grid .opengridjs-grid-row:nth-child(even):hover {
+  background-color: var(--og-surface-hover);
 }
 
 .opengridjs-grid .opengridjs-selected-grid-row {
-    background-color: #dee2e6 !important;
+  background-color: var(--og-selected) !important;
+  border-left: 3px solid var(--og-selected-border);
+  padding-left: calc(var(--og-spacing-lg) - 3px);
 }
 
+/* Grid Column Items */
 .opengridjs-grid .opengridjs-grid-column-item {
-    flex-grow: 1;
-    text-align: left
+  flex-grow: 1;
+  padding: var(--og-spacing-lg);
+  color: var(--og-text-primary);
+  border-right: 1px solid var(--og-border);
+  min-width: 50px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  display: flex;
+  align-items: center;
+  height:2px;
 }
 
-.opengridjs-grid .opengridjs-grid-header-item, .opengridjs-grid-column-item{
-    min-width: 50px;
+.opengridjs-grid .opengridjs-grid-column-item:last-child {
+  border-right: none;
 }
 
+/* Custom Scrollbar */
 .opengridjs-grid .opengridjs-grid-rows-container::-webkit-scrollbar {
-    width: 10px;
+  width: 8px;
 }
 
 .opengridjs-grid .opengridjs-grid-rows-container::-webkit-scrollbar-track {
-    background: #f1f1f1;
+  background: var(--og-scrollbar-track);
+  border-radius: var(--og-radius-sm);
 }
 
 .opengridjs-grid .opengridjs-grid-rows-container::-webkit-scrollbar-thumb {
-    background: #888;
+  background: var(--og-scrollbar-thumb);
+  border-radius: var(--og-radius-sm);
+  transition: var(--og-transition);
 }
 
 .opengridjs-grid .opengridjs-grid-rows-container::-webkit-scrollbar-thumb:hover {
-    background: #555;
+  background: var(--og-scrollbar-thumb-hover);
 }
 
+/* Context Menu */
 .opengridjs-grid .opengridjs-contextMenu {
-    background-color: #343a40;
-    color: white;
-    font-weight: bold;
-    position: absolute;
-    border-radius: 3px;
-    min-width: 200px;
-    z-index: 100;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-}
-
-.opengridjs-grid .opengridjs-contextMenu .opengridjs-btn {
-    width: 100%;
-    border-radius: 0;
-    background-color: #343a40 !important;
-    text-align: left;
-    color: white;
-    padding: 5px;
-    border: 0;
-    padding-left: 15px;
-    cursor: pointer;
-    transition: background-color 0.2s;
+  background-color: var(--og-context-bg);
+  border: 1px solid var(--og-context-border);
+  border-radius: var(--og-radius-md);
+  box-shadow: var(--og-shadow-hover);
+  position: absolute;
+  min-width: 200px;
+  z-index: 1000;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .opengridjs-grid .opengridjs-contextMenu .opengridjs-title {
-    padding: 10px;
+  padding: var(--og-spacing-md) var(--og-spacing-lg);
+  font-weight: var(--og-font-weight-semibold);
+  color: var(--og-text-primary);
+  border-bottom: 1px solid var(--og-border);
+  background-color: var(--og-surface);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.opengridjs-grid .opengridjs-contextMenu hr {
-    margin: 2px;
-    background-color: #52525e !important;
+.opengridjs-grid .opengridjs-contextMenu .opengridjs-btn {
+  width: 100%;
+  padding: var(--og-spacing-md) var(--og-spacing-lg);
+  border: none;
+  background: none;
+  color: var(--og-text-primary);
+  cursor: pointer;
+  transition: var(--og-transition-fast);
+  text-align: left;
+  font-size: var(--og-font-size);
+  font-family: var(--og-font-family);
+  display: flex;
+  align-items: center;
+  min-height: 40px;
 }
 
 .opengridjs-grid .opengridjs-contextMenu .opengridjs-btn:hover {
-    background-color: #52525e !important;
-    color: white !important;
+  background-color: var(--og-context-hover);
+  color: var(--og-accent);
 }
 
+.opengridjs-grid .opengridjs-contextMenu .opengridjs-btn:active {
+  background-color: var(--og-surface);
+}
+
+.opengridjs-grid .opengridjs-contextMenu hr {
+  border: none;
+  border-top: 1px solid var(--og-border);
+  margin: var(--og-spacing-xs) 0;
+}
+
+/* Sort Indicator */
 .opengridjs-grid .opengridjs-sort-indicator {
-    margin-left: 5px;
-    display: inline-block;
-    border-left: 4px solid transparent;
-    border-right: 4px solid transparent;
-    position: relative;
-    top: 0%;
-    transform: translateY(-50%);
+  margin-left: var(--og-spacing-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--og-radius-sm);
+  transition: var(--og-transition);
+  position: relative;
 }
 
+.opengridjs-grid .opengridjs-sort-indicator::after {
+  content: '';
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  opacity: 0.5;
+  transition: var(--og-transition);
+}
+
+.opengridjs-grid .opengridjs-sort-asc .opengridjs-sort-indicator::after {
+  border-bottom: 5px solid var(--og-accent);
+  opacity: 1;
+}
+
+.opengridjs-grid .opengridjs-sort-desc .opengridjs-sort-indicator::after {
+  border-top: 5px solid var(--og-accent);
+  opacity: 1;
+}
+
+.opengridjs-grid .opengridjs-sort-asc .opengridjs-sort-indicator,
 .opengridjs-grid .opengridjs-sort-desc .opengridjs-sort-indicator {
-    border-bottom: 4px solid white;
+  background-color: var(--og-selected);
 }
 
-.opengridjs-grid .opengridjs-sort-asc .opengridjs-sort-indicator {
-    border-top: 4px solid white;
-}
-
-.opengridjs-grid a {
-    color: #007bff;
-    text-decoration: none;
-}
-
+/* Resize Handle */
 .opengridjs-grid .opengridjs-resize-handle {
-    position: absolute;
-    right: 0;
-    top: 0;
-    width: 4px;
-    height: 100%;
-    cursor: col-resize;
-    background-color: transparent;
-    border-right: 2px solid transparent;
-    transition: border-color 0.2s;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 4px;
+  height: 100%;
+  cursor: col-resize;
+  background-color: transparent;
+  border-right: 2px solid transparent;
+  transition: var(--og-transition);
+  z-index: 5;
 }
 
 .opengridjs-grid .opengridjs-resize-handle:hover {
-    border-right: 2px solid #007bff;
+  border-right-color: var(--og-resize-handle-hover);
+  background-color: var(--og-resize-handle-hover);
+  opacity: 0.3;
 }
 
 .opengridjs-grid .opengridjs-grid-header-item.opengridjs-resizing {
-    user-select: none;
+  user-select: none;
+  cursor: col-resize;
 }
 
 .opengridjs-grid .opengridjs-grid-header-item.opengridjs-resizing .opengridjs-resize-handle {
-    border-right: 2px solid #007bff;
+  border-right-color: var(--og-resize-handle-hover);
+  background-color: var(--og-resize-handle-hover);
+  opacity: 0.6;
+}
+
+/* Links */
+.opengridjs-grid a {
+  color: var(--og-accent);
+  text-decoration: none;
+  transition: var(--og-transition);
+  border-radius: var(--og-radius-sm);
+  padding: 2px 4px;
+  margin: -2px -4px;
+}
+
+.opengridjs-grid a:hover {
+  color: var(--og-accent-hover);
+  background-color: var(--og-selected);
+  text-decoration: none;
+}
+
+.opengridjs-grid a:focus {
+  outline: 2px solid var(--og-accent);
+  outline-offset: 2px;
+}
+
+/* Focus and Accessibility */
+.opengridjs-grid .opengridjs-grid-header-item:focus-visible,
+.opengridjs-grid .opengridjs-grid-row:focus-visible {
+  outline: 2px solid var(--og-accent);
+  outline-offset: -2px;
+}
+
+.opengridjs-grid .opengridjs-contextMenu .opengridjs-btn:focus-visible {
+  outline: 2px solid var(--og-accent);
+  outline-offset: -2px;
+}
+
+/* Animation for smooth transitions */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.opengridjs-grid .opengridjs-contextMenu {
+  animation: fadeIn 0.15s ease-out;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .opengridjs-grid {
+    font-size: 13px;
+  }
+  
+  .opengridjs-grid .opengridjs-grid-header-item,
+  .opengridjs-grid .opengridjs-grid-column-item {
+    padding: var(--og-spacing-sm) var(--og-spacing-md);
+  }
+  
+  .opengridjs-grid .opengridjs-grid-header-item,
+  .opengridjs-grid .opengridjs-grid-row {
+    min-height: 40px;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .opengridjs-grid {
+    --og-border: #000000;
+    --og-shadow: 0 0 0 1px #000000;
+  }
+  
+  [data-theme="dark"] .opengridjs-grid {
+    --og-border: #ffffff;
+    --og-shadow: 0 0 0 1px #ffffff;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .opengridjs-grid,
+  .opengridjs-grid * {
+    transition: none !important;
+    animation: none !important;
+  }
 }
