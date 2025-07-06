@@ -225,7 +225,7 @@
   overflow-wrap: break-word;
   display: flex;
   align-items: center;
-  height:2px; 
+  height:2px;
 }
 
 .opengridjs-grid .opengridjs-grid-column-item:last-child {
