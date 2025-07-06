@@ -4,13 +4,13 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'opengrid.js'
-      - 'opengrid.css'
+      - 'src/opengrid.js'
+      - 'src/opengrid.css'
   pull_request:
     branches: [ main ]
     paths:
-      - 'opengrid.js'
-      - 'opengrid.css'
+      - 'src/opengrid.js'
+      - 'src/opengrid.css'
 
 jobs:
   minify:
@@ -33,14 +33,14 @@ jobs:
           
       - name: Minify JavaScript
         run: |
-          terser opengrid.js --compress --mangle --output opengrid.min.js
+          terser src/opengrid.js --compress --mangle --output dist/opengrid.min.js
           
       - name: Minify CSS
         run: |
-          cleancss -o opengrid.min.css opengrid.css
+          cleancss -o dist/opengrid.min.css src/opengrid.css
           
       - name: Push changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Auto-minify assets [skip ci]"
-          file_pattern: "opengrid.min.js opengrid.min.css"
+          file_pattern: "dist/opengrid.min.js dist/opengrid.min.css"

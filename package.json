@@ -20,7 +20,9 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "build": "echo 'Build process not automated - manually create minified files in dist/'",
+    "build": "npm run build:js && npm run build:css",
+    "build:js": "terser src/opengrid.js --compress --mangle --output dist/opengrid.min.js",
+    "build:css": "cleancss -o dist/opengrid.min.css src/opengrid.css",
     "dev": "echo 'Development mode - use src/ files directly'"
   },
   "files": [
@@ -32,6 +34,8 @@
   "devDependencies": {
     "jest": "^30.0.3",
     "jest-environment-jsdom": "^30.0.2",
-    "jsdom": "^26.1.0"
+    "jsdom": "^26.1.0",
+    "terser": "^5.19.2",
+    "clean-css-cli": "^5.6.2"
   }
 }

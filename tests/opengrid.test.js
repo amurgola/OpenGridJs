@@ -12,7 +12,7 @@ const path = require('path');
 describe('OpenGrid Baseline Tests', () => {
   
   test('OpenGrid source file should exist and contain class definition', () => {
-    const openGridPath = path.join(__dirname, '../opengrid.js');
+    const openGridPath = path.join(__dirname, '../src/opengrid.js');
     
     // Verify file exists
     expect(fs.existsSync(openGridPath)).toBe(true);
@@ -30,7 +30,7 @@ describe('OpenGrid Baseline Tests', () => {
   });
 
   test('OpenGrid class methods should be present in source', () => {
-    const openGridPath = path.join(__dirname, '../opengrid.js');
+    const openGridPath = path.join(__dirname, '../src/opengrid.js');
     const content = fs.readFileSync(openGridPath, 'utf8');
     
     // Verify key methods exist
@@ -58,7 +58,7 @@ describe('OpenGrid Baseline Tests', () => {
   });
 
   test('OpenGrid should have virtual scrolling constants', () => {
-    const openGridPath = path.join(__dirname, '../opengrid.js');
+    const openGridPath = path.join(__dirname, '../src/opengrid.js');
     const content = fs.readFileSync(openGridPath, 'utf8');
     
     // Verify virtual scrolling configuration
@@ -68,7 +68,7 @@ describe('OpenGrid Baseline Tests', () => {
   });
 
   test('OpenGrid should have sorting functionality', () => {
-    const openGridPath = path.join(__dirname, '../opengrid.js');
+    const openGridPath = path.join(__dirname, '../src/opengrid.js');
     const content = fs.readFileSync(openGridPath, 'utf8');
     
     // Verify sorting logic
@@ -80,7 +80,7 @@ describe('OpenGrid Baseline Tests', () => {
   });
 
   test('OpenGrid should handle data with and without IDs', () => {
-    const openGridPath = path.join(__dirname, '../opengrid.js');
+    const openGridPath = path.join(__dirname, '../src/opengrid.js');
     const content = fs.readFileSync(openGridPath, 'utf8');
     
     // Verify GUID generation for missing IDs
@@ -92,7 +92,7 @@ describe('OpenGrid Baseline Tests', () => {
   });
 
   test('OpenGrid should have context menu functionality', () => {
-    const openGridPath = path.join(__dirname, '../opengrid.js');
+    const openGridPath = path.join(__dirname, '../src/opengrid.js');
     const content = fs.readFileSync(openGridPath, 'utf8');
     
     // Verify context menu features
@@ -104,7 +104,7 @@ describe('OpenGrid Baseline Tests', () => {
   });
 
   test('OpenGrid should have search and filter functionality', () => {
-    const openGridPath = path.join(__dirname, '../opengrid.js');
+    const openGridPath = path.join(__dirname, '../src/opengrid.js');
     const content = fs.readFileSync(openGridPath, 'utf8');
     
     // Verify search functionality
@@ -115,7 +115,7 @@ describe('OpenGrid Baseline Tests', () => {
   });
 
   test('OpenGrid should have CSV export functionality', () => {
-    const openGridPath = path.join(__dirname, '../opengrid.js');
+    const openGridPath = path.join(__dirname, '../src/opengrid.js');
     const content = fs.readFileSync(openGridPath, 'utf8');
     
     // Verify CSV export
@@ -127,7 +127,7 @@ describe('OpenGrid Baseline Tests', () => {
   });
 
   test('OpenGrid should have infinite scroll functionality', () => {
-    const openGridPath = path.join(__dirname, '../opengrid.js');
+    const openGridPath = path.join(__dirname, '../src/opengrid.js');
     const content = fs.readFileSync(openGridPath, 'utf8');
     
     // Verify infinite scroll features
@@ -139,7 +139,7 @@ describe('OpenGrid Baseline Tests', () => {
   });
 
   test('OpenGrid should have debouncing for performance', () => {
-    const openGridPath = path.join(__dirname, '../opengrid.js');
+    const openGridPath = path.join(__dirname, '../src/opengrid.js');
     const content = fs.readFileSync(openGridPath, 'utf8');
     
     // Verify debounce implementation

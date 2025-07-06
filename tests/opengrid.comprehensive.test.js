@@ -12,7 +12,7 @@ describe('OpenGrid Comprehensive Testing', () => {
   let openGridSource;
   
   beforeAll(() => {
-    const openGridPath = path.join(__dirname, '../opengrid.js');
+    const openGridPath = path.join(__dirname, '../src/opengrid.js');
     openGridSource = fs.readFileSync(openGridPath, 'utf8');
   });
 
@@ -401,7 +401,7 @@ describe('OpenGrid Feature Completeness', () => {
   let openGridSource;
   
   beforeAll(() => {
-    const openGridPath = path.join(__dirname, '../opengrid.js');
+    const openGridPath = path.join(__dirname, '../src/opengrid.js');
     openGridSource = fs.readFileSync(openGridPath, 'utf8');
   });
 
