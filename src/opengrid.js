@@ -4,7 +4,7 @@ class OpenGrid {
     isLoadingMoreData = false;
     loadedAtGridHeight = []
 
-    constructor(className, data, gridHeight, setup, loadMoreDataFunction = null) {
+    constructor(className, data, gridHeight, setup = {}, loadMoreDataFunction = null) {
         this.className = className;
         this.sortState = { column: null, direction: null };
         this.gridData = [];
