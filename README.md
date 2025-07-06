@@ -83,7 +83,7 @@ Download the latest release from the [GitHub releases page](https://github.com/a
 
 ## 📊 Demo
 
-![OpenGridJs Demo](https://github.com/amurgola/OpenGridJs/blob/main/Demo.gif)
+![OpenGridJs Demo](https://github.com/amurgola/OpenGridJs/blob/main/docs/Demo.gif)
 
 [Live Demo on CodePen](https://codepen.io/amurgola/pen/RweqdMo)
 

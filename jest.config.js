@@ -5,8 +5,8 @@ module.exports = {
     '<rootDir>/tests/**/*.test.js'
   ],
   collectCoverageFrom: [
-    'opengrid.js',
-    '!opengrid.min.js'
+    'src/opengrid.js',
+    '!dist/opengrid.min.js'
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html']
