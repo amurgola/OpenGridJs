@@ -15,11 +15,12 @@ on:
 jobs:
   minify:
     runs-on: ubuntu-latest
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -38,15 +39,9 @@ jobs:
         run: |
           cleancss -o opengrid.min.css opengrid.css
           
-      - name: Commit minified files
+      - name: Commit and push minified files
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add opengrid.min.js opengrid.min.css
-          git diff --staged --quiet || git commit -m "Auto-minify assets [skip ci]"
-          
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GH_PAT }}
-          branch: ${{ github.ref }}
+          git diff --staged --quiet || (git commit -m "Auto-minify assets [skip ci]" && git push)
