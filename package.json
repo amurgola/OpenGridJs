@@ -1,6 +1,6 @@
 {
   "name": "opengridjs",
-  "version": "1.1.8",
+  "version": "1.1.9",
   "description": "A lightweight JavaScript grid framework that allows you to create fast and easy-to-use data grids in your web application. It supports virtual scrolling, custom column headers, and context menus.",
   "main": "opengrid.min.js",
   "style": "opengrid.min.css",
@@ -20,14 +20,17 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "build": "npm run build:js && npm run build:css",
+    "build": "npm run build:js && npm run build:css && npm run copy:src",
     "build:js": "terser src/opengrid.js --compress --mangle --output opengrid.min.js",
     "build:css": "cleancss -o opengrid.min.css src/opengrid.css",
+    "copy:src": "cp src/opengrid.js opengrid.js && cp src/opengrid.css opengrid.css",
     "dev": "echo 'Development mode - use src/ files directly'"
   },
   "files": [
     "opengrid.min.js",
     "opengrid.min.css",
+    "opengrid.js",
+    "opengrid.css",
     "src/",
     "dist/",
     "README.md",

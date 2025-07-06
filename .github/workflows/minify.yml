@@ -33,18 +33,14 @@ jobs:
           npm install -g terser
           npm install -g clean-css-cli
           
-      - name: Minify JavaScript
+      - name: Build all files
         run: |
-          terser src/opengrid.js --compress --mangle --output opengrid.min.js
-          terser src/opengrid.js --compress --mangle --output dist/opengrid.min.js
-          
-      - name: Minify CSS
-        run: |
-          cleancss -o opengrid.min.css src/opengrid.css
-          cleancss -o dist/opengrid.min.css src/opengrid.css
+          npm run build
+          cp opengrid.min.js dist/
+          cp opengrid.min.css dist/
           
       - name: Push changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Auto-minify assets [skip ci]"
-          file_pattern: "opengrid.min.js opengrid.min.css dist/opengrid.min.js dist/opengrid.min.css"
+          file_pattern: "opengrid.min.js opengrid.min.css opengrid.js opengrid.css dist/opengrid.min.js dist/opengrid.min.css"
