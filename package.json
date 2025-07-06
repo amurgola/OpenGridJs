@@ -1,6 +1,6 @@
 {
   "name": "opengridjs",
-  "version": "1.1.9",
+  "version": "1.2.0",
   "description": "A lightweight JavaScript grid framework that allows you to create fast and easy-to-use data grids in your web application. It supports virtual scrolling, custom column headers, and context menus.",
   "main": "opengrid.min.js",
   "style": "opengrid.min.css",

@@ -43,7 +43,7 @@ class OpenGrid {
             this.generateGridRows();
             this.addEventListeners(setup);
         }
-    }
+    } 
 
     debounce(func, delay) {
         let inDebounce;
