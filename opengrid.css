@@ -158,6 +158,7 @@
   align-items: center;
   min-height: 35px;
   text-transform: none;
+  box-sizing: border-box;
 }
 
 .opengridjs-grid .opengridjs-grid-header-item:last-child {
@@ -226,7 +227,8 @@
   overflow-wrap: break-word;
   display: flex;
   align-items: center;
-  height:2px; 
+  height: 2px;
+  box-sizing: border-box;
 }
 
 .opengridjs-grid .opengridjs-grid-column-item:last-child {

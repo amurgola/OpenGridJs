@@ -44,6 +44,9 @@ class OpenGrid {
             this.generateGridHeader(setup);
             this.generateGridRows();
             this.addEventListeners(setup);
+            
+            // Calculate content-based minimum widths after initial render
+            setTimeout(() => this.updateColumnWidths(), 0);
         }
     } 
 
@@ -114,7 +117,7 @@ class OpenGrid {
                     headerData.push({
                         data: setup.columnHeaderNames[i].columnName,
                         headerName: setup.columnHeaderNames[i].columnNameDisplay ?? setup.columnHeaderNames[i].columnName,
-                        width: setup.columnHeaderNames[i].columnWidth ? `min-width:${setup.columnHeaderNames[i].columnWidth}px` : gridItemWidthStyle,
+                        width: setup.columnHeaderNames[i].columnWidth ? `min-width:${setup.columnHeaderNames[i].columnWidth}` : gridItemWidthStyle,
                         format: setup.columnHeaderNames[i].format,
                     });
                 }
@@ -127,9 +130,7 @@ class OpenGrid {
                 console.warn('Invalid header data:', header);
                 return '';
             }
-            const headerStyle = (header.width.includes('min-width') || header.width.includes('width:')) ? 
-                `${header.width}; flex-grow: 0; flex-shrink: 0;` : 
-                header.width;
+            const headerStyle = this.getColumnStyle(header);
             return `<div class='opengridjs-grid-header-item' draggable="true" data-header='${header.data}' style='${headerStyle}'>
                 <span class='opengridjs-header-text'>${header.headerName}</span>
                 <span class='opengridjs-header-actions'>
@@ -215,7 +216,8 @@ class OpenGrid {
             if (!isResizing) return;
             
             const deltaX = e.clientX - startX;
-            const newWidth = Math.max(50, startWidth + deltaX);
+            const minAllowedWidth = this.headerData[headerIndex].contentMinWidth || 80;
+            const newWidth = Math.max(minAllowedWidth, startWidth + deltaX);
             
             this.headerData[headerIndex].width = `min-width:${newWidth}px`;
             headerItem.style.width = `${newWidth}px`;
@@ -249,19 +251,145 @@ class OpenGrid {
     }
 
     updateColumnWidths() {
+        // Calculate content-based minimum widths first
+        this.calculateContentMinWidths();
+        
         const gridRows = this.rootElement.querySelectorAll('.opengridjs-grid-row');
         gridRows.forEach(row => {
             const columnItems = row.querySelectorAll('.opengridjs-grid-column-item');
             columnItems.forEach((item, index) => {
                 if (this.headerData[index]) {
-                    item.style.cssText = this.headerData[index].width;
-                    if (this.headerData[index].width.includes('min-width') || this.headerData[index].width.includes('width:')) {
-                        item.style.flexGrow = '0';
-                        item.style.flexShrink = '0';
-                    }
+                    const columnStyle = this.getColumnStyle(this.headerData[index]);
+                    item.style.cssText = columnStyle;
                 }
             });
         });
+        
+        // Update header widths to match
+        this.updateHeaderWidths();
+    }
+
+    calculateContentMinWidths() {
+        // Get a sample of visible rows to calculate content widths
+        const visibleRows = this.rootElement.querySelectorAll('.opengridjs-grid-row');
+        const headerItems = this.rootElement.querySelectorAll('.opengridjs-grid-header-item');
+        
+        this.headerData.forEach((header, columnIndex) => {
+            let maxContentWidth = 0;
+            
+            // Check header content width
+            if (headerItems[columnIndex]) {
+                const headerText = headerItems[columnIndex].querySelector('.opengridjs-header-text');
+                if (headerText) {
+                    const headerWidth = this.measureTextWidth(headerText.textContent, headerText);
+                    maxContentWidth = Math.max(maxContentWidth, headerWidth + 60); // Add padding for filter button and actions
+                }
+            }
+            
+            // Check a sample of cell contents
+            const sampleSize = Math.min(10, visibleRows.length); // Only check first 10 rows for performance
+            for (let i = 0; i < sampleSize; i++) {
+                const row = visibleRows[i];
+                const cell = row.querySelectorAll('.opengridjs-grid-column-item')[columnIndex];
+                if (cell) {
+                    const cellWidth = this.measureTextWidth(cell.textContent, cell);
+                    maxContentWidth = Math.max(maxContentWidth, cellWidth + 32); // Add padding
+                }
+            }
+            
+            // Enforce minimum width of 80px
+            header.contentMinWidth = Math.max(80, maxContentWidth);
+        });
+    }
+
+    measureTextWidth(text, element) {
+        try {
+            // Create a temporary element to measure text width
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            
+            if (!context) {
+                throw new Error('Canvas context not available');
+            }
+            
+            // Get computed styles from the element
+            const styles = window.getComputedStyle(element);
+            context.font = `${styles.fontWeight} ${styles.fontSize} ${styles.fontFamily}`;
+            
+            // Measure the text
+            const metrics = context.measureText(text || '');
+            return Math.ceil(metrics.width);
+        } catch (error) {
+            // Fallback for environments without canvas support (like JSDOM tests)
+            return this.estimateTextWidth(text, element);
+        }
+    }
+
+    estimateTextWidth(text, element) {
+        // Fallback method using DOM measurement
+        const testElement = document.createElement('span');
+        testElement.style.position = 'absolute';
+        testElement.style.visibility = 'hidden';
+        testElement.style.whiteSpace = 'nowrap';
+        testElement.style.pointerEvents = 'none';
+        
+        // Copy relevant styles from the original element
+        if (element && window.getComputedStyle) {
+            const styles = window.getComputedStyle(element);
+            testElement.style.font = styles.font;
+            testElement.style.fontSize = styles.fontSize;
+            testElement.style.fontFamily = styles.fontFamily;
+            testElement.style.fontWeight = styles.fontWeight;
+        } else {
+            // Default styles for test environments
+            testElement.style.fontSize = '14px';
+            testElement.style.fontFamily = 'Arial, sans-serif';
+            testElement.style.fontWeight = 'normal';
+        }
+        
+        testElement.textContent = text || '';
+        document.body.appendChild(testElement);
+        
+        let width = testElement.offsetWidth;
+        document.body.removeChild(testElement);
+        
+        // If DOM measurement fails (like in JSDOM), use character-based estimation
+        if (width === 0 && text) {
+            // Rough estimation: assume average character width of 7px for 14px font
+            const avgCharWidth = 7;
+            width = (text.length * avgCharWidth);
+        }
+        
+        return width;
+    }
+
+    updateHeaderWidths() {
+        const headerItems = this.rootElement.querySelectorAll('.opengridjs-grid-header-item');
+        headerItems.forEach((headerItem, index) => {
+            if (this.headerData[index]) {
+                const columnStyle = this.getColumnStyle(this.headerData[index]);
+                headerItem.style.cssText = columnStyle;
+            }
+        });
+    }
+
+    getColumnStyle(header) {
+        let baseStyle = header.width;
+        let minWidthConstraint = '';
+        
+        // Add content-based minimum width if calculated
+        if (header.contentMinWidth) {
+            minWidthConstraint = `min-width: ${header.contentMinWidth}px; `;
+        }
+        
+        // Ensure consistent styling between headers and cells
+        if (header.width.includes('min-width') || header.width.includes('width:')) {
+            // Fixed width columns should not grow or shrink, but respect content min-width
+            return `${minWidthConstraint}${baseStyle}; flex-grow: 0; flex-shrink: 0; box-sizing: border-box;`;
+        } else {
+            // Percentage or flex-based columns can grow but still respect content min-width
+            return `${minWidthConstraint}${baseStyle}; box-sizing: border-box;`;
+        }
     }
 
     autoResizeColumns() {
@@ -351,9 +479,7 @@ class OpenGrid {
                 found = formatter(found);
             }
 
-            const columnStyle = (header.width.includes('min-width') || header.width.includes('width:')) ? 
-                `${header.width}; flex-grow: 0; flex-shrink: 0;` : 
-                header.width;
+            const columnStyle = this.getColumnStyle(header);
             return `<div class='opengridjs-grid-column-item' style='${columnStyle}'>${found}</div>`;
         }).join('');
     }
