@@ -22,6 +22,7 @@ A lightweight, high-performance JavaScript grid framework for modern web applica
 ### Data Handling
 - **Asynchronous Loading**: Promise-based data loading with loading states
 - **Infinite Scrolling**: Load more data automatically as users scroll
+- **Real-time Updates**: Update records by ID with visual animations and position preservation
 - **Dynamic Updates**: Append, filter, and refresh data without full re-renders
 - **GUID Generation**: Automatic ID assignment for data items without identifiers
 
@@ -204,6 +205,7 @@ const setup = {
 | Method | Parameters | Description |
 |--------|------------|-------------|
 | `appendData(data)` | Array | Add new data to the grid |
+| `updateRecordData(data, options)` | Array/Object, Options | Update records by ID with animations |
 | `rerender()` | none | Force grid re-render |
 | `reset()` | none | Reset grid to initial state |
 | `exportToCSV()` | none | Download grid data as CSV |
@@ -218,6 +220,26 @@ grid.appendData([
     { id: 4, name: "Alice Brown", email: "alice@example.com", age: 28 }
 ]);
 
+// Real-time updates with animations
+// Update single record
+grid.updateRecordData({ id: 2, score: 95, status: "Active" });
+
+// Update multiple records
+grid.updateRecordData([
+    { id: 1, score: 88 },  // Green animation if score increased
+    { id: 3, score: 72 }   // Red animation if score decreased
+]);
+
+// Update with custom options
+grid.updateRecordData(
+    { id: 4, name: "John Updated", score: 90 },
+    {
+        animate: true,           // Enable animations (default: true)
+        preservePosition: true,  // Prevent row reordering (default: true)
+        highlightDuration: 3000  // Animation duration in ms (default: 2000)
+    }
+);
+
 // Filter data
 grid.searchFilter("john");
 
@@ -227,6 +249,45 @@ grid.exportToCSV();
 // Reset grid
 grid.reset();
 ```
+
+## 🔄 Real-time Updates
+
+OpenGridJs now supports real-time data updates with visual animations and intelligent positioning:
+
+### Features
+- **ID-based Updates**: Update records by matching their unique ID
+- **Visual Animations**: 
+  - 🟢 Green for numeric increases
+  - 🔴 Red for numeric decreases  
+  - 🔵 Blue for non-numeric changes
+- **Position Preservation**: Updates don't cause data bouncing or reordering
+- **Batch Updates**: Update multiple records simultaneously
+- **Centered Filter Menus**: Filter menus now appear centered under column headers
+
+### Animation Types
+
+```javascript
+// Numeric increase (green animation)
+grid.updateRecordData({ id: 1, score: 95 }); // if previous score was lower
+
+// Numeric decrease (red animation)
+grid.updateRecordData({ id: 1, score: 75 }); // if previous score was higher
+
+// Non-numeric change (blue animation)
+grid.updateRecordData({ id: 1, name: "New Name", status: "Updated" });
+```
+
+### Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `animate` | boolean | `true` | Enable/disable animations |
+| `preservePosition` | boolean | `true` | Prevent row reordering during updates |
+| `highlightDuration` | number | `2000` | Animation duration in milliseconds |
+
+### Demo
+
+Try the interactive demo at `demo-realtime-updates.html` to see all features in action!
 
 ## 🎨 Styling & Theming
 

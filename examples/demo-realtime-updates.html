@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenGrid Real-time Updates Demo</title>
+    <link rel="stylesheet" href="../opengrid.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background: #f5f7fa;
+            color: #333;
+        }
+        
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .demo-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .demo-header h1 {
+            color: #2563eb;
+            margin-bottom: 10px;
+        }
+        
+        .demo-header p {
+            color: #64748b;
+            font-size: 16px;
+        }
+        
+        .controls-section {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 4px solid #2563eb;
+        }
+        
+        .controls-section h3 {
+            margin: 0 0 15px 0;
+            color: #1e293b;
+        }
+        
+        .control-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .control-group:last-child {
+            margin-bottom: 0;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+        
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+        
+        .btn-success {
+            background: #16a34a;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #15803d;
+        }
+        
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+        
+        .btn-secondary {
+            background: #64748b;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #475569;
+        }
+        
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .input-group label {
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .input-group input {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .grid-container {
+            margin-bottom: 30px;
+        }
+        
+        .legend {
+            background: #fefce8;
+            border: 1px solid #fde047;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .legend h4 {
+            margin: 0 0 10px 0;
+            color: #92400e;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 2px solid;
+        }
+        
+        .legend-green {
+            background: rgba(34, 197, 94, 0.2);
+            border-color: rgb(34, 197, 94);
+        }
+        
+        .legend-red {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgb(239, 68, 68);
+        }
+        
+        .legend-blue {
+            background: rgba(59, 130, 246, 0.15);
+            border-color: rgb(59, 130, 246);
+        }
+        
+        .status-log {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        
+        .status-log .timestamp {
+            color: #64748b;
+        }
+        
+        .status-log .success {
+            color: #22c55e;
+        }
+        
+        .status-log .info {
+            color: #3b82f6;
+        }
+        
+        .auto-update-section {
+            background: #f0f9ff;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #0ea5e9;
+            margin-top: 20px;
+        }
+        
+        .auto-update-section h4 {
+            margin: 0 0 10px 0;
+            color: #0c4a6e;
+        }
+        
+        .update-interval {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .demo-grid {
+            height: 400px;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="demo-header">
+            <h1>🚀 OpenGrid Real-time Updates Demo</h1>
+            <p>Experience live data updates with visual animations and centered filter menus</p>
+        </div>
+
+        <div class="legend">
+            <h4>📊 Animation Legend</h4>
+            <div class="legend-item">
+                <div class="legend-color legend-green"></div>
+                <span><strong>Green:</strong> Numeric value increased</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color legend-red"></div>
+                <span><strong>Red:</strong> Numeric value decreased</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color legend-blue"></div>
+                <span><strong>Blue:</strong> Non-numeric field updated</span>
+            </div>
+        </div>
+
+        <div class="controls-section">
+            <h3>🎮 Real-time Update Controls</h3>
+            
+            <div class="control-group">
+                <button class="btn btn-success" onclick="increaseRandomScore()">📈 Increase Random Score</button>
+                <button class="btn btn-danger" onclick="decreaseRandomScore()">📉 Decrease Random Score</button>
+                <button class="btn btn-primary" onclick="updateRandomName()">✏️ Update Random Name</button>
+                <button class="btn btn-primary" onclick="updateRandomStatus()">🔄 Update Random Status</button>
+            </div>
+            
+            <div class="control-group">
+                <button class="btn btn-success" onclick="bulkIncreaseScores()">📈 Bulk Score Increase</button>
+                <button class="btn btn-danger" onclick="bulkDecreaseScores()">📉 Bulk Score Decrease</button>
+                <button class="btn btn-secondary" onclick="randomMixedUpdates()">🎲 Random Mixed Updates</button>
+            </div>
+
+            <div class="control-group">
+                <div class="input-group">
+                    <label>Custom Update ID:</label>
+                    <input type="number" id="customId" placeholder="Enter ID (1-10)" min="1" max="10">
+                    <input type="number" id="customScore" placeholder="New Score" min="0" max="100">
+                    <button class="btn btn-primary" onclick="customUpdate()">Update</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="auto-update-section">
+            <h4>🤖 Auto-Update Simulation</h4>
+            <div class="update-interval">
+                <label>
+                    <input type="checkbox" id="autoUpdate" onchange="toggleAutoUpdate()">
+                    Enable Auto Updates
+                </label>
+                <span style="margin-left: 20px;">Interval:</span>
+                <select id="updateInterval" onchange="updateAutoUpdateInterval()">
+                    <option value="1000">1 second</option>
+                    <option value="2000" selected>2 seconds</option>
+                    <option value="3000">3 seconds</option>
+                    <option value="5000">5 seconds</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="grid-container">
+            <div class="demo-grid"></div>
+        </div>
+
+        <div class="controls-section">
+            <h3>🔍 Filter Menu Demo</h3>
+            <p><strong>Try this:</strong> Click on any column header's filter button (▼) to see the new centered positioning!</p>
+            <p>The filter menu now appears centered under the header text instead of far to the right.</p>
+        </div>
+
+        <div class="status-log" id="statusLog">
+            <div><span class="timestamp">[Demo Started]</span> <span class="info">OpenGrid initialized with real-time update capabilities</span></div>
+        </div>
+    </div>
+
+    <script src="../opengrid.js"></script>
+    <script>
+        // Sample data for the demo
+        const sampleData = [
+            { id: 1, name: "Alice Johnson", department: "Engineering", score: 85, status: "Active", location: "New York" },
+            { id: 2, name: "Bob Chen", department: "Design", score: 92, status: "Active", location: "San Francisco" },
+            { id: 3, name: "Carol Davis", department: "Marketing", score: 78, status: "Active", location: "Chicago" },
+            { id: 4, name: "David Wilson", department: "Engineering", score: 88, status: "Inactive", location: "Seattle" },
+            { id: 5, name: "Eva Rodriguez", department: "Sales", score: 94, status: "Active", location: "Austin" },
+            { id: 6, name: "Frank Miller", department: "HR", score: 82, status: "Active", location: "Boston" },
+            { id: 7, name: "Grace Kim", department: "Finance", score: 90, status: "Active", location: "Denver" },
+            { id: 8, name: "Henry Taylor", department: "Engineering", score: 76, status: "Inactive", location: "Portland" },
+            { id: 9, name: "Iris Chang", department: "Design", score: 87, status: "Active", location: "Los Angeles" },
+            { id: 10, name: "Jack Brown", department: "Marketing", score: 83, status: "Active", location: "Miami" }
+        ];
+
+        // Initialize the grid
+        const grid = new OpenGrid('demo-grid', sampleData, 400, {
+            contextMenuOptions: [
+                { actionName: "View Details", actionFunctionName: "viewDetails", className: "view-details" },
+                { actionName: "Edit Record", actionFunctionName: "editRecord", className: "edit-record" }
+            ],
+            contextMenuTitle: "Employee Actions"
+        });
+
+        let autoUpdateTimer = null;
+        let updateCounter = 0;
+
+        // Utility functions
+        function getRandomEmployee() {
+            return sampleData[Math.floor(Math.random() * sampleData.length)];
+        }
+
+        function getRandomNumber(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function logUpdate(message, type = 'info') {
+            const statusLog = document.getElementById('statusLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.innerHTML = `<span class="timestamp">[${timestamp}]</span> <span class="${type}">${message}</span>`;
+            statusLog.appendChild(logEntry);
+            statusLog.scrollTop = statusLog.scrollHeight;
+        }
+
+        // Demo functions
+        function increaseRandomScore() {
+            const employee = getRandomEmployee();
+            const oldScore = employee.score;
+            const newScore = Math.min(100, oldScore + getRandomNumber(1, 15));
+            
+            grid.updateRecordData({
+                id: employee.id,
+                score: newScore
+            });
+            
+            logUpdate(`📈 Increased ${employee.name}'s score from ${oldScore} to ${newScore}`, 'success');
+        }
+
+        function decreaseRandomScore() {
+            const employee = getRandomEmployee();
+            const oldScore = employee.score;
+            const newScore = Math.max(0, oldScore - getRandomNumber(1, 15));
+            
+            grid.updateRecordData({
+                id: employee.id,
+                score: newScore
+            });
+            
+            logUpdate(`📉 Decreased ${employee.name}'s score from ${oldScore} to ${newScore}`, 'success');
+        }
+
+        function updateRandomName() {
+            const employee = getRandomEmployee();
+            const surnames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez'];
+            const newSurname = surnames[Math.floor(Math.random() * surnames.length)];
+            const firstName = employee.name.split(' ')[0];
+            const newName = `${firstName} ${newSurname}`;
+            
+            grid.updateRecordData({
+                id: employee.id,
+                name: newName
+            });
+            
+            logUpdate(`✏️ Updated employee name from "${employee.name}" to "${newName}"`, 'info');
+            employee.name = newName; // Update our local data too
+        }
+
+        function updateRandomStatus() {
+            const employee = getRandomEmployee();
+            const newStatus = employee.status === 'Active' ? 'Inactive' : 'Active';
+            
+            grid.updateRecordData({
+                id: employee.id,
+                status: newStatus
+            });
+            
+            logUpdate(`🔄 Changed ${employee.name}'s status from "${employee.status}" to "${newStatus}"`, 'info');
+            employee.status = newStatus; // Update our local data too
+        }
+
+        function bulkIncreaseScores() {
+            const updates = sampleData.slice(0, 5).map(employee => ({
+                id: employee.id,
+                score: Math.min(100, employee.score + getRandomNumber(1, 10))
+            }));
+            
+            grid.updateRecordData(updates);
+            logUpdate(`📈 Bulk increased scores for ${updates.length} employees`, 'success');
+            
+            // Update our local data
+            updates.forEach(update => {
+                const employee = sampleData.find(e => e.id === update.id);
+                if (employee) employee.score = update.score;
+            });
+        }
+
+        function bulkDecreaseScores() {
+            const updates = sampleData.slice(5, 10).map(employee => ({
+                id: employee.id,
+                score: Math.max(0, employee.score - getRandomNumber(1, 10))
+            }));
+            
+            grid.updateRecordData(updates);
+            logUpdate(`📉 Bulk decreased scores for ${updates.length} employees`, 'success');
+            
+            // Update our local data
+            updates.forEach(update => {
+                const employee = sampleData.find(e => e.id === update.id);
+                if (employee) employee.score = update.score;
+            });
+        }
+
+        function randomMixedUpdates() {
+            const updates = [];
+            const locations = ['New York', 'San Francisco', 'Chicago', 'Seattle', 'Austin', 'Boston', 'Denver', 'Portland', 'Los Angeles', 'Miami'];
+            
+            // Pick 3 random employees for mixed updates
+            for (let i = 0; i < 3; i++) {
+                const employee = getRandomEmployee();
+                const updateType = Math.random();
+                
+                if (updateType < 0.5) {
+                    // Score update
+                    const newScore = getRandomNumber(60, 100);
+                    updates.push({ id: employee.id, score: newScore });
+                    employee.score = newScore;
+                } else {
+                    // Location update
+                    const newLocation = locations[Math.floor(Math.random() * locations.length)];
+                    updates.push({ id: employee.id, location: newLocation });
+                    employee.location = newLocation;
+                }
+            }
+            
+            grid.updateRecordData(updates);
+            logUpdate(`🎲 Applied ${updates.length} random mixed updates`, 'info');
+        }
+
+        function customUpdate() {
+            const idInput = document.getElementById('customId');
+            const scoreInput = document.getElementById('customScore');
+            
+            const id = parseInt(idInput.value);
+            const score = parseInt(scoreInput.value);
+            
+            if (!id || !score || id < 1 || id > 10 || score < 0 || score > 100) {
+                alert('Please enter a valid ID (1-10) and score (0-100)');
+                return;
+            }
+            
+            const employee = sampleData.find(e => e.id === id);
+            if (!employee) {
+                alert('Employee not found');
+                return;
+            }
+            
+            const oldScore = employee.score;
+            grid.updateRecordData({ id: id, score: score });
+            employee.score = score;
+            
+            logUpdate(`🎯 Custom update: Set employee ID ${id} score from ${oldScore} to ${score}`, 'success');
+            
+            // Clear inputs
+            idInput.value = '';
+            scoreInput.value = '';
+        }
+
+        function toggleAutoUpdate() {
+            const checkbox = document.getElementById('autoUpdate');
+            
+            if (checkbox.checked) {
+                startAutoUpdate();
+                logUpdate('🤖 Auto-update simulation started', 'info');
+            } else {
+                stopAutoUpdate();
+                logUpdate('🤖 Auto-update simulation stopped', 'info');
+            }
+        }
+
+        function startAutoUpdate() {
+            const interval = parseInt(document.getElementById('updateInterval').value);
+            
+            autoUpdateTimer = setInterval(() => {
+                updateCounter++;
+                
+                // Alternate between different types of updates
+                switch (updateCounter % 4) {
+                    case 0:
+                        increaseRandomScore();
+                        break;
+                    case 1:
+                        decreaseRandomScore();
+                        break;
+                    case 2:
+                        updateRandomStatus();
+                        break;
+                    case 3:
+                        updateRandomName();
+                        break;
+                }
+            }, interval);
+        }
+
+        function stopAutoUpdate() {
+            if (autoUpdateTimer) {
+                clearInterval(autoUpdateTimer);
+                autoUpdateTimer = null;
+            }
+        }
+
+        function updateAutoUpdateInterval() {
+            const checkbox = document.getElementById('autoUpdate');
+            if (checkbox.checked) {
+                stopAutoUpdate();
+                startAutoUpdate();
+                logUpdate('🔄 Auto-update interval changed', 'info');
+            }
+        }
+
+        // Context menu custom functions
+        window.viewDetails = function(selectedRow) {
+            alert(`Employee Details:\n\nName: ${selectedRow.name}\nDepartment: ${selectedRow.department}\nScore: ${selectedRow.score}\nStatus: ${selectedRow.status}\nLocation: ${selectedRow.location}`);
+        };
+
+        window.editRecord = function(selectedRow) {
+            const newScore = prompt(`Edit score for ${selectedRow.name}:`, selectedRow.score);
+            if (newScore !== null) {
+                const score = parseInt(newScore);
+                if (!isNaN(score) && score >= 0 && score <= 100) {
+                    grid.updateRecordData({ id: selectedRow.id, score: score });
+                    logUpdate(`✏️ Manual edit: Updated ${selectedRow.name}'s score to ${score}`, 'success');
+                    
+                    // Update local data
+                    const employee = sampleData.find(e => e.id === selectedRow.id);
+                    if (employee) employee.score = score;
+                } else {
+                    alert('Please enter a valid score (0-100)');
+                }
+            }
+        };
+
+        // Add some initial demo activity
+        setTimeout(() => {
+            logUpdate('🎉 Demo ready! Try the buttons above to see real-time updates with animations', 'success');
+        }, 500);
+
+        setTimeout(() => {
+            logUpdate('💡 Tip: Try clicking filter buttons (▼) in column headers to see centered positioning', 'info');
+        }, 2000);
+    </script>
+</body>
+</html>

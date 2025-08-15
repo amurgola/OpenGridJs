@@ -492,6 +492,65 @@
   cursor: grabbing;
 }
 
+/* Real-time Update Animations */
+.opengridjs-grid .opengridjs-grid-column-item.opengridjs-field-increased {
+  background-color: rgba(34, 197, 94, 0.2);
+  border-left: 3px solid rgb(34, 197, 94);
+  animation: fieldIncreased 2s ease-out;
+}
+
+.opengridjs-grid .opengridjs-grid-column-item.opengridjs-field-decreased {
+  background-color: rgba(239, 68, 68, 0.2);
+  border-left: 3px solid rgb(239, 68, 68);
+  animation: fieldDecreased 2s ease-out;
+}
+
+.opengridjs-grid .opengridjs-grid-column-item.opengridjs-field-updated {
+  background-color: rgba(59, 130, 246, 0.15);
+  border-left: 3px solid rgb(59, 130, 246);
+  animation: fieldUpdated 2s ease-out;
+}
+
+/* Animation keyframes for field updates */
+@keyframes fieldIncreased {
+  0% {
+    background-color: rgba(34, 197, 94, 0.4);
+    border-left-color: rgb(34, 197, 94);
+    transform: scale(1.02);
+  }
+  100% {
+    background-color: rgba(34, 197, 94, 0.1);
+    border-left-color: rgba(34, 197, 94, 0.3);
+    transform: scale(1);
+  }
+}
+
+@keyframes fieldDecreased {
+  0% {
+    background-color: rgba(239, 68, 68, 0.4);
+    border-left-color: rgb(239, 68, 68);
+    transform: scale(1.02);
+  }
+  100% {
+    background-color: rgba(239, 68, 68, 0.1);
+    border-left-color: rgba(239, 68, 68, 0.3);
+    transform: scale(1);
+  }
+}
+
+@keyframes fieldUpdated {
+  0% {
+    background-color: rgba(59, 130, 246, 0.3);
+    border-left-color: rgb(59, 130, 246);
+    transform: scale(1.01);
+  }
+  100% {
+    background-color: rgba(59, 130, 246, 0.05);
+    border-left-color: rgba(59, 130, 246, 0.2);
+    transform: scale(1);
+  }
+}
+
 /* Filter Button and Header Layout */
 .opengridjs-grid .opengridjs-header-text {
   flex-grow: 1;

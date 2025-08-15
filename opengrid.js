@@ -889,6 +889,130 @@ class OpenGrid {
         }
     }
 
+    updateRecordData(newData, options = {}) {
+        const { 
+            animate = true, 
+            preservePosition = true,
+            highlightDuration = 2000 
+        } = options;
+
+        // Ensure newData is an array
+        const recordsToUpdate = Array.isArray(newData) ? newData : [newData];
+        
+        recordsToUpdate.forEach(newRecord => {
+            if (!newRecord.id) {
+                console.warn('Record update requires an id field:', newRecord);
+                return;
+            }
+
+            // Find existing record in original data
+            const existingIndex = this.originalData.findIndex(item => item.id.toString() === newRecord.id.toString());
+            
+            if (existingIndex !== -1) {
+                const oldRecord = this.originalData[existingIndex];
+                
+                // Store old values for animation comparison
+                const changedFields = {};
+                Object.keys(newRecord).forEach(key => {
+                    if (oldRecord[key] !== newRecord[key]) {
+                        changedFields[key] = {
+                            oldValue: oldRecord[key],
+                            newValue: newRecord[key],
+                            isNumeric: !isNaN(oldRecord[key]) && !isNaN(newRecord[key])
+                        };
+                    }
+                });
+
+                // Update the record in original data
+                this.originalData[existingIndex] = { ...oldRecord, ...newRecord };
+
+                // Update in filtered data if it exists
+                if (this.filteredData) {
+                    const filteredIndex = this.filteredData.findIndex(item => item.id.toString() === newRecord.id.toString());
+                    if (filteredIndex !== -1) {
+                        this.filteredData[filteredIndex] = { ...this.filteredData[filteredIndex], ...newRecord };
+                    }
+                }
+
+                // Update the visual representation without full rerender if preservePosition is true
+                if (preservePosition) {
+                    this.updateRecordVisually(newRecord.id, newRecord, changedFields, animate, highlightDuration);
+                } else {
+                    // Full rerender if position preservation is not required
+                    if (this.filteredData) {
+                        this.processData(this.filteredData);
+                    } else {
+                        this.processData(this.originalData);
+                    }
+                    this.rerender();
+                }
+            } else {
+                console.warn('Record with id not found for update:', newRecord.id);
+            }
+        });
+    }
+
+    updateRecordVisually(recordId, newData, changedFields, animate, highlightDuration) {
+        // Find the visual row element
+        const rowElement = this.rootElement.querySelector(`[data-id="${recordId}"]`);
+        
+        if (!rowElement) {
+            return; // Row not currently visible
+        }
+
+        // Update each column that has changed
+        const columnItems = rowElement.querySelectorAll('.opengridjs-grid-column-item');
+        
+        columnItems.forEach((columnItem, index) => {
+            if (index >= this.headerData.length) return;
+            
+            const headerInfo = this.headerData[index];
+            const fieldName = headerInfo.data;
+            
+            if (changedFields[fieldName]) {
+                const change = changedFields[fieldName];
+                let displayValue = newData[fieldName];
+                
+                // Apply formatter if available
+                if (headerInfo.format && typeof headerInfo.format === 'function') {
+                    displayValue = headerInfo.format(displayValue);
+                }
+                
+                // Update the content
+                columnItem.innerHTML = displayValue || '&nbsp;';
+                
+                if (animate) {
+                    this.animateFieldChange(columnItem, change, highlightDuration);
+                }
+            }
+        });
+    }
+
+    animateFieldChange(element, change, duration) {
+        // Remove any existing animation classes
+        element.classList.remove('opengridjs-field-updated', 'opengridjs-field-increased', 'opengridjs-field-decreased');
+        
+        if (change.isNumeric) {
+            const oldNum = parseFloat(change.oldValue);
+            const newNum = parseFloat(change.newValue);
+            
+            if (newNum > oldNum) {
+                element.classList.add('opengridjs-field-increased');
+            } else if (newNum < oldNum) {
+                element.classList.add('opengridjs-field-decreased');
+            } else {
+                element.classList.add('opengridjs-field-updated');
+            }
+        } else {
+            element.classList.add('opengridjs-field-updated');
+        }
+        
+        // Remove animation classes after duration
+        setTimeout(() => {
+            element.classList.remove('opengridjs-field-updated', 'opengridjs-field-increased', 'opengridjs-field-decreased');
+        }, duration);
+    }
+
     stopLoadingMoreData() {
         this.canLoadMoreData = false;
     }
@@ -924,12 +1048,19 @@ class OpenGrid {
         filterMenu.className = 'opengridjs-filter-menu';
         filterMenu.setAttribute('data-column', column);
         
-        // Position the menu below the filter button
-        const buttonRect = filterButton.getBoundingClientRect();
+        // Position the menu below the header item (centered under the header text)
+        const headerItem = filterButton.closest('.opengridjs-grid-header-item');
+        const headerItemRect = headerItem.getBoundingClientRect();
         const gridRect = this.rootElement.getBoundingClientRect();
+        
+        // Calculate center position of the header item
+        const headerCenter = headerItemRect.left + (headerItemRect.width / 2) - gridRect.left;
+        const menuWidth = 250; // Min width from CSS
+        const leftPosition = Math.max(0, headerCenter - (menuWidth / 2));
+        
         filterMenu.style.position = 'absolute';
-        filterMenu.style.left = `${buttonRect.left - gridRect.left}px`;
-        filterMenu.style.top = `${buttonRect.bottom - gridRect.top}px`;
+        filterMenu.style.left = `${leftPosition}px`;
+        filterMenu.style.top = `${headerItemRect.bottom - gridRect.top}px`;
         filterMenu.style.zIndex = '1000';
         
         // Build menu content
