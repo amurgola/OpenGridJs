@@ -686,6 +686,24 @@ class OpenGrid {
     }
 
     createContextMenu(options) {
+        // Create default context menu if none provided
+        if (!options) {
+            options = [
+                { 
+                    actionName: 'Copy Row', 
+                    actionFunctionName: 'copyRow', 
+                    className: 'opengridjs-copy-row',
+                    isBuiltIn: true
+                },
+                { 
+                    actionName: 'Export to CSV', 
+                    actionFunctionName: 'exportToCSV', 
+                    className: 'opengridjs-export-csv',
+                    isBuiltIn: true
+                }
+            ];
+        }
+
         if (options) {
             const gridRows = this.rootElement.querySelectorAll('.opengridjs-grid-row');
             gridRows.forEach(gridRow => {
@@ -708,7 +726,7 @@ class OpenGrid {
 
                     this.gridSelectedObject = this.gridData.find(x => x.data.id.toString() === id).data;
 
-                    const title = this.contextMenuTitle ?? "Title";
+                    const title = this.contextMenuTitle ?? "Actions";
                     
                     // Get the grid container's position relative to the viewport
                     const gridRect = this.rootElement.getBoundingClientRect();
@@ -718,7 +736,7 @@ class OpenGrid {
                     const selections = `
                 <div class="opengridjs-contextMenu" style="left:${left}; top: ${top}">
                     <div class="opengridjs-title">${title}</div><hr/>
-                    ${options.map((option, index) => `<button data-id="${id}" class="opengridjs-context-menu-button ${option.className} opengridjs-btn" data-action="${option.actionFunctionName}">${option.actionName}</button>`).join('')}
+                    ${options.map((option, index) => `<button data-id="${id}" class="opengridjs-context-menu-button ${option.className} opengridjs-btn" data-action="${option.actionFunctionName}" data-built-in="${option.isBuiltIn || false}">${option.actionName}</button>`).join('')}
                     <br/>&nbsp;
                 </div>`;
 
@@ -727,7 +745,23 @@ class OpenGrid {
                     this.rootElement.querySelectorAll('.opengridjs-context-menu-button').forEach(button => {
                         button.addEventListener('click', (event) => {
                             const actionFunctionName = event.target.getAttribute('data-action');
-                            window[actionFunctionName](this.gridSelectedObject);
+                            const isBuiltIn = event.target.getAttribute('data-built-in') === 'true';
+                            
+                            if (isBuiltIn) {
+                                // Call the built-in method with appropriate parameters
+                                if (actionFunctionName === 'copyRow') {
+                                    this.copyRow(this.gridSelectedObject);
+                                } else if (actionFunctionName === 'exportToCSV') {
+                                    this.exportToCSV();
+                                } else if (typeof this[actionFunctionName] === 'function') {
+                                    this[actionFunctionName](this.gridSelectedObject);
+                                }
+                            } else {
+                                // Call external function from window object (legacy behavior)
+                                if (window[actionFunctionName]) {
+                                    window[actionFunctionName](this.gridSelectedObject);
+                                }
+                            }
                             this.closeContextMenu();
                         });
                     });
@@ -735,6 +769,51 @@ class OpenGrid {
 
                 gridRow.addEventListener('click', () => this.closeContextMenu());
             });
+        }
+    }
+
+    copyRow(rowData) {
+        try {
+            // Convert row data to a formatted string
+            const formattedData = Object.entries(rowData)
+                .map(([key, value]) => `${key}: ${value}`)
+                .join('\n');
+            
+            // Use the modern Clipboard API if available
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(formattedData).then(() => {
+                    console.log('Row data copied to clipboard');
+                }).catch(err => {
+                    console.error('Failed to copy to clipboard:', err);
+                    this.fallbackCopyToClipboard(formattedData);
+                });
+            } else {
+                // Fallback for older browsers or non-secure contexts
+                this.fallbackCopyToClipboard(formattedData);
+            }
+        } catch (error) {
+            console.error('Error copying row data:', error);
+        }
+    }
+
+    fallbackCopyToClipboard(text) {
+        // Create a temporary textarea element
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        
+        try {
+            textArea.focus();
+            textArea.select();
+            document.execCommand('copy');
+            console.log('Row data copied to clipboard (fallback)');
+        } catch (err) {
+            console.error('Fallback copy failed:', err);
+        } finally {
+            document.body.removeChild(textArea);
         }
     }
 
