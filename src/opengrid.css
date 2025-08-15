@@ -118,7 +118,7 @@
   background-color: var(--og-background);
   border: 1px solid var(--og-border);
   border-radius: var(--og-radius-lg);
-  overflow: visible;
+  overflow: hidden;
   box-shadow: var(--og-shadow);
   transition: var(--og-transition);
   user-select: none;
@@ -142,7 +142,9 @@
   z-index: 10;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-    overflow: hidden;
+  overflow: hidden;
+  border-top-left-radius: var(--og-radius-lg);
+  border-top-right-radius: var(--og-radius-lg);
 }
 
 .opengridjs-grid .opengridjs-grid-header-item {
@@ -161,8 +163,13 @@
   box-sizing: border-box;
 }
 
+.opengridjs-grid .opengridjs-grid-header-item:first-child {
+  border-top-left-radius: var(--og-radius-lg);
+}
+
 .opengridjs-grid .opengridjs-grid-header-item:last-child {
   border-right: none;
+  border-top-right-radius: var(--og-radius-lg);
 }
 
 .opengridjs-grid .opengridjs-grid-header-item:hover {
@@ -181,6 +188,8 @@
   flex-grow: 1;
   background-color: var(--og-background);
   min-height: 200px;
+  border-bottom-left-radius: var(--og-radius-lg);
+  border-bottom-right-radius: var(--og-radius-lg);
 }
 
 /* Grid Rows */
@@ -233,6 +242,21 @@
 
 .opengridjs-grid .opengridjs-grid-column-item:last-child {
   border-right: none;
+}
+
+/* Bottom border radius for rows at the bottom of the visible area */
+.opengridjs-grid .opengridjs-grid-row:last-child {
+  border-bottom-left-radius: var(--og-radius-lg);
+  border-bottom-right-radius: var(--og-radius-lg);
+  border-bottom: none;
+}
+
+.opengridjs-grid .opengridjs-grid-row:last-child .opengridjs-grid-column-item:first-child {
+  border-bottom-left-radius: var(--og-radius-lg);
+}
+
+.opengridjs-grid .opengridjs-grid-row:last-child .opengridjs-grid-column-item:last-child {
+  border-bottom-right-radius: var(--og-radius-lg);
 }
 
 /* Custom Scrollbar */
