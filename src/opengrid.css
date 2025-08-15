@@ -1,8 +1,12 @@
-/* OpenGrid CSS - Modern Clean Theme with Dark/Light Mode Support */
+/* ===========================================================================
+   OpenGrid CSS - Modern Clean Theme with Dark/Light Mode Support
+   =========================================================================== */
 
-/* CSS Variables for Theme Management */
+/* ===========================================================================
+   CSS Variables & Theme Configuration
+   =========================================================================== */
 :root {
-  /* Light Mode Colors */
+  /* Colors */
   --og-background: #ffffff;
   --og-surface: #f8f9fa;
   --og-surface-hover: #e9ecef;
@@ -18,12 +22,18 @@
   --og-accent-hover: #0284c7;
   --og-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.1);
   --og-shadow-hover: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
+  
+  /* Scrollbar */
   --og-scrollbar-track: #f1f5f9;
   --og-scrollbar-thumb: #cbd5e1;
   --og-scrollbar-thumb-hover: #94a3b8;
+  
+  /* Context Menu */
   --og-context-bg: #ffffff;
   --og-context-border: #e1e5e9;
   --og-context-hover: #f8f9fa;
+  
+  /* Resize Handle */
   --og-resize-handle: #cbd5e1;
   --og-resize-handle-hover: #0ea5e9;
   
@@ -50,6 +60,14 @@
   /* Transitions */
   --og-transition: all 0.15s ease-in-out;
   --og-transition-fast: all 0.1s ease-in-out;
+  
+  /* Dimensions */
+  --og-min-row-height: 35px;
+  --og-min-column-width: 50px;
+  --og-context-menu-min-width: 200px;
+  --og-filter-menu-min-width: 250px;
+  --og-filter-menu-max-width: 300px;
+  --og-filter-options-max-height: 250px;
 }
 
 /* Dark Mode Theme */
@@ -108,7 +126,9 @@
   }
 }
 
-/* Main Grid Container */
+/* ===========================================================================
+   Main Grid Container
+   =========================================================================== */
 .opengridjs-grid {
   font-family: var(--og-font-family);
   font-size: var(--og-font-size);
@@ -118,25 +138,58 @@
   background-color: var(--og-background);
   border: 1px solid var(--og-border);
   border-radius: var(--og-radius-lg);
-  overflow: hidden;
   box-shadow: var(--og-shadow);
   transition: var(--og-transition);
   user-select: none;
   display: flex;
   flex-direction: column;
   position: relative;
+  /* Allow overflow for menus */
+  overflow: visible;
+}
+
+/* Container for content that needs proper clipping */
+.opengridjs-grid::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: var(--og-radius-lg);
+  pointer-events: none;
+  z-index: -1;
+  background: var(--og-background);
+}
+
+/* Additional container for menus */
+.opengridjs-grid-additional {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 10000;
+  /* Don't interfere with layout */
+  overflow: visible;
+}
+
+.opengridjs-grid-additional > * {
+  pointer-events: auto;
 }
 
 .opengridjs-grid:hover {
   box-shadow: var(--og-shadow-hover);
 }
 
-/* Grid Header */
-.opengridjs-grid .opengridjs-grid-header {
+/* ===========================================================================
+   Grid Header
+   =========================================================================== */
+.opengridjs-grid-header {
   display: flex;
   background-color: var(--og-header-bg);
   border-bottom: 1px solid var(--og-header-border);
-  padding: 0;
   position: sticky;
   top: 0;
   z-index: 10;
@@ -147,7 +200,7 @@
   border-top-right-radius: var(--og-radius-lg);
 }
 
-.opengridjs-grid .opengridjs-grid-header-item {
+.opengridjs-grid-header-item {
   flex-grow: 1;
   padding: var(--og-spacing-lg);
   font-weight: var(--og-font-weight-semibold);
@@ -158,30 +211,45 @@
   position: relative;
   display: flex;
   align-items: center;
-  min-height: 35px;
-  text-transform: none;
+  min-height: var(--og-min-row-height);
   box-sizing: border-box;
 }
 
-.opengridjs-grid .opengridjs-grid-header-item:first-child {
+.opengridjs-grid-header-item:first-child {
   border-top-left-radius: var(--og-radius-lg);
 }
 
-.opengridjs-grid .opengridjs-grid-header-item:last-child {
+.opengridjs-grid-header-item:last-child {
   border-right: none;
   border-top-right-radius: var(--og-radius-lg);
 }
 
-.opengridjs-grid .opengridjs-grid-header-item:hover {
+.opengridjs-grid-header-item:hover {
   background-color: var(--og-surface-hover);
 }
 
-.opengridjs-grid .opengridjs-grid-header-item:active {
+.opengridjs-grid-header-item:active {
   background-color: var(--og-surface);
 }
 
-/* Grid Rows Container */
-.opengridjs-grid .opengridjs-grid-rows-container {
+/* Header Text and Actions */
+.opengridjs-header-text {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+}
+
+.opengridjs-header-actions {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  gap: 4px;
+}
+
+/* ===========================================================================
+   Grid Rows Container
+   =========================================================================== */
+.opengridjs-grid-rows-container {
   overflow-y: auto;
   overflow-x: hidden;
   position: relative;
@@ -192,46 +260,56 @@
   border-bottom-right-radius: var(--og-radius-lg);
 }
 
-/* Grid Rows */
-.opengridjs-grid .opengridjs-grid-row {
+/* ===========================================================================
+   Grid Rows
+   =========================================================================== */
+.opengridjs-grid-row {
   display: flex;
   background-color: var(--og-background);
   border-bottom: 1px solid var(--og-border);
-  padding: 0;
   align-items: center;
   position: absolute;
   width: 100%;
   box-sizing: border-box;
   cursor: pointer;
   transition: var(--og-transition-fast);
-  min-height: 35px;
+  min-height: var(--og-min-row-height);
 }
 
-.opengridjs-grid .opengridjs-grid-row:hover {
+.opengridjs-grid-row:hover {
   background-color: var(--og-surface-hover);
 }
 
-.opengridjs-grid .opengridjs-grid-row:nth-child(even) {
+.opengridjs-grid-row:nth-child(even) {
   background-color: var(--og-surface);
 }
 
-.opengridjs-grid .opengridjs-grid-row:nth-child(even):hover {
+.opengridjs-grid-row:nth-child(even):hover {
   background-color: var(--og-surface-hover);
 }
 
-.opengridjs-grid .opengridjs-selected-grid-row {
+.opengridjs-selected-grid-row {
   background-color: var(--og-selected) !important;
   border-left: 3px solid var(--og-selected-border);
   padding-left: calc(var(--og-spacing-lg) - 3px);
 }
 
-/* Grid Column Items */
-.opengridjs-grid .opengridjs-grid-column-item {
+/* Bottom row border radius */
+.opengridjs-grid-row:last-child {
+  border-bottom-left-radius: var(--og-radius-lg);
+  border-bottom-right-radius: var(--og-radius-lg);
+  border-bottom: none;
+}
+
+/* ===========================================================================
+   Grid Column Items
+   =========================================================================== */
+.opengridjs-grid-column-item {
   flex-grow: 1;
   padding: var(--og-spacing-lg);
   color: var(--og-text-primary);
   border-right: 1px solid var(--og-border);
-  min-width: 50px;
+  min-width: var(--og-min-column-width);
   word-wrap: break-word;
   overflow-wrap: break-word;
   display: flex;
@@ -240,60 +318,314 @@
   box-sizing: border-box;
 }
 
-.opengridjs-grid .opengridjs-grid-column-item:last-child {
+.opengridjs-grid-column-item:last-child {
   border-right: none;
 }
 
-/* Bottom border radius for rows at the bottom of the visible area */
-.opengridjs-grid .opengridjs-grid-row:last-child {
-  border-bottom-left-radius: var(--og-radius-lg);
-  border-bottom-right-radius: var(--og-radius-lg);
-  border-bottom: none;
-}
-
-.opengridjs-grid .opengridjs-grid-row:last-child .opengridjs-grid-column-item:first-child {
+/* Bottom corner radius for last row */
+.opengridjs-grid-row:last-child .opengridjs-grid-column-item:first-child {
   border-bottom-left-radius: var(--og-radius-lg);
 }
 
-.opengridjs-grid .opengridjs-grid-row:last-child .opengridjs-grid-column-item:last-child {
+.opengridjs-grid-row:last-child .opengridjs-grid-column-item:last-child {
   border-bottom-right-radius: var(--og-radius-lg);
 }
 
-/* Custom Scrollbar */
-.opengridjs-grid .opengridjs-grid-rows-container::-webkit-scrollbar {
-  width: 8px;
+/* ===========================================================================
+   Sorting
+   =========================================================================== */
+.opengridjs-sort-indicator {
+  margin-left: var(--og-spacing-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--og-radius-sm);
+  transition: var(--og-transition);
+  position: relative;
 }
 
-.opengridjs-grid .opengridjs-grid-rows-container::-webkit-scrollbar-track {
-  background: var(--og-scrollbar-track);
-  border-radius: var(--og-radius-sm);
-}
-
-.opengridjs-grid .opengridjs-grid-rows-container::-webkit-scrollbar-thumb {
-  background: var(--og-scrollbar-thumb);
-  border-radius: var(--og-radius-sm);
+.opengridjs-sort-indicator::after {
+  content: '';
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  opacity: 0.5;
   transition: var(--og-transition);
 }
 
-.opengridjs-grid .opengridjs-grid-rows-container::-webkit-scrollbar-thumb:hover {
-  background: var(--og-scrollbar-thumb-hover);
+.opengridjs-sort-asc .opengridjs-sort-indicator::after {
+  border-bottom: 5px solid var(--og-accent);
+  opacity: 1;
 }
 
-/* Context Menu */
-.opengridjs-grid .opengridjs-contextMenu {
+.opengridjs-sort-desc .opengridjs-sort-indicator::after {
+  border-top: 5px solid var(--og-accent);
+  opacity: 1;
+}
+
+.opengridjs-sort-asc .opengridjs-sort-indicator,
+.opengridjs-sort-desc .opengridjs-sort-indicator {
+  background-color: var(--og-selected);
+}
+
+/* ===========================================================================
+   Column Resize Handle
+   =========================================================================== */
+.opengridjs-resize-handle {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 4px;
+  height: 100%;
+  cursor: col-resize;
+  background-color: transparent;
+  border-right: 2px solid transparent;
+  transition: var(--og-transition);
+  z-index: 5;
+}
+
+.opengridjs-resize-handle:hover {
+  border-right-color: var(--og-resize-handle-hover);
+  background-color: var(--og-resize-handle-hover);
+  opacity: 0.3;
+}
+
+.opengridjs-grid-header-item.opengridjs-resizing {
+  user-select: none;
+  cursor: col-resize;
+}
+
+.opengridjs-grid-header-item.opengridjs-resizing .opengridjs-resize-handle {
+  border-right-color: var(--og-resize-handle-hover);
+  background-color: var(--og-resize-handle-hover);
+  opacity: 0.6;
+}
+
+/* ===========================================================================
+   Drag and Drop
+   =========================================================================== */
+.opengridjs-grid-header-item[draggable="true"] {
+  cursor: grab;
+}
+
+.opengridjs-grid-header-item[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+.opengridjs-grid-header-item.opengridjs-dragging {
+  opacity: 0.7;
+  background-color: var(--og-accent);
+  color: white;
+  cursor: grabbing;
+  z-index: 1000;
+}
+
+.opengridjs-grid-header-item.opengridjs-drag-over {
+  background-color: var(--og-selected);
+  border-left: 3px solid var(--og-accent);
+  border-right: 3px solid var(--og-accent);
+  transform: scale(1.02);
+}
+
+/* ===========================================================================
+   Filter Button & Menu
+   =========================================================================== */
+.opengridjs-filter-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--og-radius-sm);
+  cursor: pointer;
+  font-size: 10px;
+  color: var(--og-text-secondary);
+  transition: var(--og-transition);
+  background-color: transparent;
+  border: 1px solid transparent;
+}
+
+.opengridjs-filter-button:hover {
+  background-color: var(--og-surface);
+  color: var(--og-accent);
+  border-color: var(--og-border);
+}
+
+.opengridjs-filter-button.opengridjs-filter-active {
+  background-color: var(--og-accent);
+  color: white;
+  border-color: var(--og-accent);
+}
+
+.opengridjs-filter-button.opengridjs-filter-active:hover {
+  background-color: var(--og-accent-hover);
+  border-color: var(--og-accent-hover);
+}
+
+/* Filter Menu Container */
+.opengridjs-filter-menu {
+  background-color: var(--og-context-bg);
+  border: 1px solid var(--og-context-border);
+  border-radius: var(--og-radius-md);
+  box-shadow: var(--og-shadow-hover);
+  min-width: var(--og-filter-menu-min-width);
+  max-width: var(--og-filter-menu-max-width);
+  z-index: 10000; /* Increased to match context menu */
+  animation: fadeIn 0.15s ease-out;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  /* Create new stacking context */
+  isolation: isolate;
+}
+
+.opengridjs-filter-menu-header {
+  display: flex;
+  gap: var(--og-spacing-sm);
+  padding: var(--og-spacing-md);
+  border-bottom: 1px solid var(--og-border);
+  background-color: var(--og-surface);
+}
+
+.opengridjs-filter-menu-header button,
+.opengridjs-filter-menu-footer button {
+  flex: 1;
+  padding: var(--og-spacing-sm) var(--og-spacing-md);
+  border: 1px solid var(--og-border);
+  border-radius: var(--og-radius-sm);
+  background-color: var(--og-background);
+  color: var(--og-text-primary);
+  cursor: pointer;
+  font-size: 12px;
+  font-family: var(--og-font-family);
+  transition: var(--og-transition);
+}
+
+.opengridjs-filter-menu-header button:hover {
+  background-color: var(--og-surface-hover);
+  border-color: var(--og-accent);
+}
+
+.opengridjs-filter-menu-footer button {
+  padding: var(--og-spacing-sm) var(--og-spacing-lg);
+  font-size: var(--og-font-size);
+  font-weight: var(--og-font-weight-medium);
+}
+
+/* Filter Search */
+.opengridjs-filter-search {
+  padding: var(--og-spacing-md);
+  border-bottom: 1px solid var(--og-border);
+}
+
+.opengridjs-filter-search-input {
+  width: 90%;
+  padding: var(--og-spacing-sm) var(--og-spacing-md);
+  border: 1px solid var(--og-border);
+  border-radius: var(--og-radius-sm);
+  background-color: var(--og-background);
+  color: var(--og-text-primary);
+  font-size: var(--og-font-size);
+  font-family: var(--og-font-family);
+  transition: var(--og-transition);
+}
+
+.opengridjs-filter-search-input:focus {
+  outline: none;
+  border-color: var(--og-accent);
+  box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.1);
+}
+
+/* Filter Options */
+.opengridjs-filter-options {
+  max-height: var(--og-filter-options-max-height);
+  overflow-y: auto;
+  padding: var(--og-spacing-sm) 0;
+}
+
+.opengridjs-filter-option {
+  display: flex;
+  align-items: center;
+  padding: var(--og-spacing-sm) var(--og-spacing-md);
+  cursor: pointer;
+  transition: var(--og-transition);
+  gap: var(--og-spacing-sm);
+}
+
+.opengridjs-filter-option:hover {
+  background-color: var(--og-surface-hover);
+}
+
+.opengridjs-filter-option input[type="checkbox"] {
+  margin: 0;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--og-accent);
+}
+
+.opengridjs-filter-option span {
+  flex: 1;
+  font-size: var(--og-font-size);
+  color: var(--og-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Filter Footer */
+.opengridjs-filter-menu-footer {
+  display: flex;
+  gap: var(--og-spacing-sm);
+  padding: var(--og-spacing-md);
+  border-top: 1px solid var(--og-border);
+  background-color: var(--og-surface);
+}
+
+.opengridjs-filter-apply {
+  background-color: var(--og-accent);
+  color: white;
+  border: 1px solid var(--og-accent);
+}
+
+.opengridjs-filter-apply:hover {
+  background-color: var(--og-accent-hover);
+  border-color: var(--og-accent-hover);
+}
+
+.opengridjs-filter-cancel {
+  background-color: var(--og-background);
+  color: var(--og-text-primary);
+  border: 1px solid var(--og-border);
+}
+
+.opengridjs-filter-cancel:hover {
+  background-color: var(--og-surface-hover);
+  border-color: var(--og-accent);
+}
+
+/* ===========================================================================
+   Context Menu
+   =========================================================================== */
+.opengridjs-contextMenu {
   background-color: var(--og-context-bg);
   border: 1px solid var(--og-context-border);
   border-radius: var(--og-radius-md);
   box-shadow: var(--og-shadow-hover);
   position: absolute;
-  min-width: 200px;
-  z-index: 1000;
+  min-width: var(--og-context-menu-min-width);
+  z-index: 10000; /* Increased to ensure it's above everything */
   overflow: hidden;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  animation: fadeIn 0.15s ease-out;
+  /* Create new stacking context */
+  isolation: isolate;
 }
 
-.opengridjs-grid .opengridjs-contextMenu .opengridjs-title {
+.opengridjs-contextMenu .opengridjs-title {
   padding: var(--og-spacing-md) var(--og-spacing-lg);
   font-weight: var(--og-font-weight-semibold);
   color: var(--og-text-primary);
@@ -304,7 +636,7 @@
   letter-spacing: 0.5px;
 }
 
-.opengridjs-grid .opengridjs-contextMenu .opengridjs-btn {
+.opengridjs-contextMenu .opengridjs-btn {
   width: 100%;
   padding: var(--og-spacing-md) var(--og-spacing-lg);
   border: none;
@@ -320,91 +652,75 @@
   min-height: 40px;
 }
 
-.opengridjs-grid .opengridjs-contextMenu .opengridjs-btn:hover {
+.opengridjs-contextMenu .opengridjs-btn:hover {
   background-color: var(--og-context-hover);
   color: var(--og-accent);
 }
 
-.opengridjs-grid .opengridjs-contextMenu .opengridjs-btn:active {
+.opengridjs-contextMenu .opengridjs-btn:active {
   background-color: var(--og-surface);
 }
 
-.opengridjs-grid .opengridjs-contextMenu hr {
+.opengridjs-contextMenu hr {
   border: none;
   border-top: 1px solid var(--og-border);
   margin: var(--og-spacing-xs) 0;
 }
 
-/* Sort Indicator */
-.opengridjs-grid .opengridjs-sort-indicator {
-  margin-left: var(--og-spacing-sm);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 16px;
-  height: 16px;
+/* ===========================================================================
+   Real-time Update Animations
+   =========================================================================== */
+.opengridjs-grid-column-item.opengridjs-field-increased {
+  background-color: rgba(34, 197, 94, 0.2);
+  border-left: 3px solid rgb(34, 197, 94);
+  animation: fieldIncreased 2s ease-out;
+}
+
+.opengridjs-grid-column-item.opengridjs-field-decreased {
+  background-color: rgba(239, 68, 68, 0.2);
+  border-left: 3px solid rgb(239, 68, 68);
+  animation: fieldDecreased 2s ease-out;
+}
+
+.opengridjs-grid-column-item.opengridjs-field-updated {
+  background-color: rgba(59, 130, 246, 0.15);
+  border-left: 3px solid rgb(59, 130, 246);
+  animation: fieldUpdated 2s ease-out;
+}
+
+/* ===========================================================================
+   Scrollbars
+   =========================================================================== */
+.opengridjs-grid-rows-container::-webkit-scrollbar,
+.opengridjs-filter-options::-webkit-scrollbar {
+  width: 8px;
+}
+
+.opengridjs-filter-options::-webkit-scrollbar {
+  width: 6px;
+}
+
+.opengridjs-grid-rows-container::-webkit-scrollbar-track,
+.opengridjs-filter-options::-webkit-scrollbar-track {
+  background: var(--og-scrollbar-track);
+  border-radius: var(--og-radius-sm);
+}
+
+.opengridjs-grid-rows-container::-webkit-scrollbar-thumb,
+.opengridjs-filter-options::-webkit-scrollbar-thumb {
+  background: var(--og-scrollbar-thumb);
   border-radius: var(--og-radius-sm);
   transition: var(--og-transition);
-  position: relative;
 }
 
-.opengridjs-grid .opengridjs-sort-indicator::after {
-  content: '';
-  width: 0;
-  height: 0;
-  border-left: 4px solid transparent;
-  border-right: 4px solid transparent;
-  opacity: 0.5;
-  transition: var(--og-transition);
+.opengridjs-grid-rows-container::-webkit-scrollbar-thumb:hover,
+.opengridjs-filter-options::-webkit-scrollbar-thumb:hover {
+  background: var(--og-scrollbar-thumb-hover);
 }
 
-.opengridjs-grid .opengridjs-sort-asc .opengridjs-sort-indicator::after {
-  border-bottom: 5px solid var(--og-accent);
-  opacity: 1;
-}
-
-.opengridjs-grid .opengridjs-sort-desc .opengridjs-sort-indicator::after {
-  border-top: 5px solid var(--og-accent);
-  opacity: 1;
-}
-
-.opengridjs-grid .opengridjs-sort-asc .opengridjs-sort-indicator,
-.opengridjs-grid .opengridjs-sort-desc .opengridjs-sort-indicator {
-  background-color: var(--og-selected);
-}
-
-/* Resize Handle */
-.opengridjs-grid .opengridjs-resize-handle {
-  position: absolute;
-  right: 0;
-  top: 0;
-  width: 4px;
-  height: 100%;
-  cursor: col-resize;
-  background-color: transparent;
-  border-right: 2px solid transparent;
-  transition: var(--og-transition);
-  z-index: 5;
-}
-
-.opengridjs-grid .opengridjs-resize-handle:hover {
-  border-right-color: var(--og-resize-handle-hover);
-  background-color: var(--og-resize-handle-hover);
-  opacity: 0.3;
-}
-
-.opengridjs-grid .opengridjs-grid-header-item.opengridjs-resizing {
-  user-select: none;
-  cursor: col-resize;
-}
-
-.opengridjs-grid .opengridjs-grid-header-item.opengridjs-resizing .opengridjs-resize-handle {
-  border-right-color: var(--og-resize-handle-hover);
-  background-color: var(--og-resize-handle-hover);
-  opacity: 0.6;
-}
-
-/* Links */
+/* ===========================================================================
+   Links
+   =========================================================================== */
 .opengridjs-grid a {
   color: var(--og-accent);
   text-decoration: none;
@@ -417,7 +733,6 @@
 .opengridjs-grid a:hover {
   color: var(--og-accent-hover);
   background-color: var(--og-selected);
-  text-decoration: none;
 }
 
 .opengridjs-grid a:focus {
@@ -425,19 +740,19 @@
   outline-offset: 2px;
 }
 
-/* Focus and Accessibility */
-.opengridjs-grid .opengridjs-grid-header-item:focus-visible,
-.opengridjs-grid .opengridjs-grid-row:focus-visible {
+/* ===========================================================================
+   Focus & Accessibility
+   =========================================================================== */
+.opengridjs-grid-header-item:focus-visible,
+.opengridjs-grid-row:focus-visible,
+.opengridjs-contextMenu .opengridjs-btn:focus-visible {
   outline: 2px solid var(--og-accent);
   outline-offset: -2px;
 }
 
-.opengridjs-grid .opengridjs-contextMenu .opengridjs-btn:focus-visible {
-  outline: 2px solid var(--og-accent);
-  outline-offset: -2px;
-}
-
-/* Animation for smooth transitions */
+/* ===========================================================================
+   Animations
+   =========================================================================== */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -449,93 +764,6 @@
   }
 }
 
-.opengridjs-grid .opengridjs-contextMenu {
-  animation: fadeIn 0.15s ease-out;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .opengridjs-grid {
-    font-size: 13px;
-  }
-  
-  .opengridjs-grid .opengridjs-grid-header-item,
-  .opengridjs-grid .opengridjs-grid-column-item {
-    padding: var(--og-spacing-sm) var(--og-spacing-md);
-  }
-  
-  .opengridjs-grid .opengridjs-grid-header-item,
-  .opengridjs-grid .opengridjs-grid-row {
-    min-height: 40px;
-  }
-}
-
-/* High contrast mode support */
-@media (prefers-contrast: high) {
-  .opengridjs-grid {
-    --og-border: #000000;
-    --og-shadow: 0 0 0 1px #000000;
-  }
-  
-  [data-theme="dark"] .opengridjs-grid {
-    --og-border: #ffffff;
-    --og-shadow: 0 0 0 1px #ffffff;
-  }
-}
-
-/* Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-  .opengridjs-grid,
-  .opengridjs-grid * {
-    transition: none !important;
-    animation: none !important;
-  }
-}
-
-/* Drag and Drop Styles */
-.opengridjs-grid .opengridjs-grid-header-item.opengridjs-dragging {
-  opacity: 0.7;
-  background-color: var(--og-accent);
-  color: white;
-  cursor: grabbing;
-  z-index: 1000;
-}
-
-.opengridjs-grid .opengridjs-grid-header-item.opengridjs-drag-over {
-  background-color: var(--og-selected);
-  border-left: 3px solid var(--og-accent);
-  border-right: 3px solid var(--og-accent);
-  transform: scale(1.02);
-}
-
-.opengridjs-grid .opengridjs-grid-header-item[draggable="true"] {
-  cursor: grab;
-}
-
-.opengridjs-grid .opengridjs-grid-header-item[draggable="true"]:active {
-  cursor: grabbing;
-}
-
-/* Real-time Update Animations */
-.opengridjs-grid .opengridjs-grid-column-item.opengridjs-field-increased {
-  background-color: rgba(34, 197, 94, 0.2);
-  border-left: 3px solid rgb(34, 197, 94);
-  animation: fieldIncreased 2s ease-out;
-}
-
-.opengridjs-grid .opengridjs-grid-column-item.opengridjs-field-decreased {
-  background-color: rgba(239, 68, 68, 0.2);
-  border-left: 3px solid rgb(239, 68, 68);
-  animation: fieldDecreased 2s ease-out;
-}
-
-.opengridjs-grid .opengridjs-grid-column-item.opengridjs-field-updated {
-  background-color: rgba(59, 130, 246, 0.15);
-  border-left: 3px solid rgb(59, 130, 246);
-  animation: fieldUpdated 2s ease-out;
-}
-
-/* Animation keyframes for field updates */
 @keyframes fieldIncreased {
   0% {
     background-color: rgba(34, 197, 94, 0.4);
@@ -575,207 +803,41 @@
   }
 }
 
-/* Filter Button and Header Layout */
-.opengridjs-grid .opengridjs-header-text {
-  flex-grow: 1;
-  display: flex;
-  align-items: center;
+/* ===========================================================================
+   Media Queries
+   =========================================================================== */
+@media (max-width: 768px) {
+  .opengridjs-grid {
+    font-size: 13px;
+  }
+  
+  .opengridjs-grid-header-item,
+  .opengridjs-grid-column-item {
+    padding: var(--og-spacing-sm) var(--og-spacing-md);
+  }
+  
+  .opengridjs-grid-header-item,
+  .opengridjs-grid-row {
+    min-height: 40px;
+  }
 }
 
-.opengridjs-grid .opengridjs-header-actions {
-  display: flex;
-  align-items: center;
-  margin-left: auto;
-  gap: 4px;
+@media (prefers-contrast: high) {
+  .opengridjs-grid {
+    --og-border: #000000;
+    --og-shadow: 0 0 0 1px #000000;
+  }
+  
+  [data-theme="dark"] .opengridjs-grid {
+    --og-border: #ffffff;
+    --og-shadow: 0 0 0 1px #ffffff;
+  }
 }
 
-.opengridjs-grid .opengridjs-filter-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  border-radius: var(--og-radius-sm);
-  cursor: pointer;
-  font-size: 10px;
-  color: var(--og-text-secondary);
-  transition: var(--og-transition);
-  background-color: transparent;
-  border: 1px solid transparent;
-}
-
-.opengridjs-grid .opengridjs-filter-button:hover {
-  background-color: var(--og-surface);
-  color: var(--og-accent);
-  border-color: var(--og-border);
-}
-
-.opengridjs-grid .opengridjs-filter-button.opengridjs-filter-active {
-  background-color: var(--og-accent);
-  color: white;
-  border-color: var(--og-accent);
-}
-
-.opengridjs-grid .opengridjs-filter-button.opengridjs-filter-active:hover {
-  background-color: var(--og-accent-hover);
-  border-color: var(--og-accent-hover);
-}
-
-/* Filter Menu */
-.opengridjs-filter-menu {
-  background-color: var(--og-context-bg);
-  border: 1px solid var(--og-context-border);
-  border-radius: var(--og-radius-md);
-  box-shadow: var(--og-shadow-hover);
-  min-width: 250px;
-  max-width: 300px;
-  z-index: 1000;
-  animation: fadeIn 0.15s ease-out;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
-.opengridjs-filter-menu-header {
-  display: flex;
-  gap: var(--og-spacing-sm);
-  padding: var(--og-spacing-md);
-  border-bottom: 1px solid var(--og-border);
-  background-color: var(--og-surface);
-}
-
-.opengridjs-filter-menu-header button {
-  flex: 1;
-  padding: var(--og-spacing-sm) var(--og-spacing-md);
-  border: 1px solid var(--og-border);
-  border-radius: var(--og-radius-sm);
-  background-color: var(--og-background);
-  color: var(--og-text-primary);
-  cursor: pointer;
-  font-size: 12px;
-  font-family: var(--og-font-family);
-  transition: var(--og-transition);
-}
-
-.opengridjs-filter-menu-header button:hover {
-  background-color: var(--og-surface-hover);
-  border-color: var(--og-accent);
-}
-
-.opengridjs-filter-search {
-  padding: var(--og-spacing-md);
-  border-bottom: 1px solid var(--og-border);
-}
-
-.opengridjs-filter-search-input {
-  width: 90%;
-  padding: var(--og-spacing-sm) var(--og-spacing-md);
-  border: 1px solid var(--og-border);
-  border-radius: var(--og-radius-sm);
-  background-color: var(--og-background);
-  color: var(--og-text-primary);
-  font-size: var(--og-font-size);
-  font-family: var(--og-font-family);
-  transition: var(--og-transition);
-}
-
-.opengridjs-filter-search-input:focus {
-  outline: none;
-  border-color: var(--og-accent);
-  box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.1);
-}
-
-.opengridjs-filter-options {
-  max-height: 250px;
-  overflow-y: auto;
-  padding: var(--og-spacing-sm) 0;
-}
-
-.opengridjs-filter-option {
-  display: flex;
-  align-items: center;
-  padding: var(--og-spacing-sm) var(--og-spacing-md);
-  cursor: pointer;
-  transition: var(--og-transition);
-  gap: var(--og-spacing-sm);
-}
-
-.opengridjs-filter-option:hover {
-  background-color: var(--og-surface-hover);
-}
-
-.opengridjs-filter-option input[type="checkbox"] {
-  margin: 0;
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-  accent-color: var(--og-accent);
-}
-
-.opengridjs-filter-option span {
-  flex: 1;
-  font-size: var(--og-font-size);
-  color: var(--og-text-primary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.opengridjs-filter-menu-footer {
-  display: flex;
-  gap: var(--og-spacing-sm);
-  padding: var(--og-spacing-md);
-  border-top: 1px solid var(--og-border);
-  background-color: var(--og-surface);
-}
-
-.opengridjs-filter-menu-footer button {
-  flex: 1;
-  padding: var(--og-spacing-sm) var(--og-spacing-lg);
-  border-radius: var(--og-radius-sm);
-  cursor: pointer;
-  font-size: var(--og-font-size);
-  font-family: var(--og-font-family);
-  font-weight: var(--og-font-weight-medium);
-  transition: var(--og-transition);
-}
-
-.opengridjs-filter-apply {
-  background-color: var(--og-accent);
-  color: white;
-  border: 1px solid var(--og-accent);
-}
-
-.opengridjs-filter-apply:hover {
-  background-color: var(--og-accent-hover);
-  border-color: var(--og-accent-hover);
-}
-
-.opengridjs-filter-cancel {
-  background-color: var(--og-background);
-  color: var(--og-text-primary);
-  border: 1px solid var(--og-border);
-}
-
-.opengridjs-filter-cancel:hover {
-  background-color: var(--og-surface-hover);
-  border-color: var(--og-accent);
-}
-
-/* Filter menu scrollbar */
-.opengridjs-filter-options::-webkit-scrollbar {
-  width: 6px;
-}
-
-.opengridjs-filter-options::-webkit-scrollbar-track {
-  background: var(--og-scrollbar-track);
-  border-radius: var(--og-radius-sm);
-}
-
-.opengridjs-filter-options::-webkit-scrollbar-thumb {
-  background: var(--og-scrollbar-thumb);
-  border-radius: var(--og-radius-sm);
-}
-
-.opengridjs-filter-options::-webkit-scrollbar-thumb:hover {
-  background: var(--og-scrollbar-thumb-hover);
+@media (prefers-reduced-motion: reduce) {
+  .opengridjs-grid,
+  .opengridjs-grid * {
+    transition: none !important;
+    animation: none !important;
+  }
 }
