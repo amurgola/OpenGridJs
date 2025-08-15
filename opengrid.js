@@ -277,12 +277,23 @@ class OpenGrid {
         this.headerData.forEach((header, columnIndex) => {
             let maxContentWidth = 0;
             
-            // Check header content width
+            // Check header content width (text + actions)
             if (headerItems[columnIndex]) {
                 const headerText = headerItems[columnIndex].querySelector('.opengridjs-header-text');
+                const headerActions = headerItems[columnIndex].querySelector('.opengridjs-header-actions');
+                
                 if (headerText) {
-                    const headerWidth = this.measureTextWidth(headerText.textContent, headerText);
-                    maxContentWidth = Math.max(maxContentWidth, headerWidth + 60); // Add padding for filter button and actions
+                    const headerTextWidth = this.measureTextWidth(headerText.textContent, headerText);
+                    let headerActionsWidth = 0;
+                    
+                    // Estimate actions width (filter button + sort indicator + gap)
+                    if (headerActions) {
+                        headerActionsWidth = 50; // Approximate width for filter button + sort indicator + spacing
+                    }
+                    
+                    // Add padding (16px each side = 32px total) + actions width
+                    const totalHeaderWidth = headerTextWidth + headerActionsWidth + 32;
+                    maxContentWidth = Math.max(maxContentWidth, totalHeaderWidth);
                 }
             }
             
@@ -293,7 +304,9 @@ class OpenGrid {
                 const cell = row.querySelectorAll('.opengridjs-grid-column-item')[columnIndex];
                 if (cell) {
                     const cellWidth = this.measureTextWidth(cell.textContent, cell);
-                    maxContentWidth = Math.max(maxContentWidth, cellWidth + 32); // Add padding
+                    // Add same padding as headers (16px each side = 32px total)
+                    const totalCellWidth = cellWidth + 32;
+                    maxContentWidth = Math.max(maxContentWidth, totalCellWidth);
                 }
             }
             
