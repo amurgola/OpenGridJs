@@ -574,6 +574,24 @@ class OpenGrid {
                 this.closeContextMenu()
             }
         });
+
+        // Add right-click context menu for header columns to open filter menu
+        gridHeader.addEventListener('contextmenu', e => {
+            const headerItem = e.target.closest('.opengridjs-grid-header-item');
+            if (headerItem) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const column = headerItem.getAttribute('data-header');
+                if (column) {
+                    // Find the filter button for this column and trigger filter menu
+                    const filterButton = headerItem.querySelector('.opengridjs-filter-button');
+                    if (filterButton) {
+                        this.toggleFilterMenu(filterButton);
+                    }
+                }
+            }
+        });
     }
 
     sortData() {
@@ -649,9 +667,9 @@ class OpenGrid {
                     <br/>&nbsp;
                 </div>`;
 
-                    document.querySelector('.opengridjs-grid-additional').innerHTML += selections;
+                    this.rootElement.querySelector('.opengridjs-grid-additional').innerHTML += selections;
 
-                    document.querySelectorAll('.opengridjs-context-menu-button').forEach(button => {
+                    this.rootElement.querySelectorAll('.opengridjs-context-menu-button').forEach(button => {
                         button.addEventListener('click', (event) => {
                             const actionFunctionName = event.target.getAttribute('data-action');
                             window[actionFunctionName](this.gridSelectedObject);
@@ -684,8 +702,9 @@ class OpenGrid {
     }
 
     closeContextMenu(action) {
-        document.querySelectorAll('.opengridjs-contextMenu').forEach(item => item.remove());
-        document.querySelectorAll('.opengridjs-selected-grid-row').forEach(item => item.classList.remove('opengridjs-selected-grid-row'));
+        // Only close context menus within this grid instance
+        this.rootElement.querySelectorAll('.opengridjs-contextMenu').forEach(item => item.remove());
+        this.rootElement.querySelectorAll('.opengridjs-selected-grid-row').forEach(item => item.classList.remove('opengridjs-selected-grid-row'));
         if (action) {
             action(this.gridSelectedObject);
         }
@@ -742,7 +761,7 @@ class OpenGrid {
 
     toggleFilterMenu(filterButton) {
         const column = filterButton.getAttribute('data-column');
-        const existingMenu = document.querySelector('.opengridjs-filter-menu');
+        const existingMenu = this.rootElement.querySelector('.opengridjs-filter-menu');
         
         // Close existing menu if clicking the same button
         if (existingMenu && existingMenu.getAttribute('data-column') === column) {
@@ -869,7 +888,7 @@ class OpenGrid {
     }
 
     closeFilterMenuOnClickOutside = (e) => {
-        const filterMenu = document.querySelector('.opengridjs-filter-menu');
+        const filterMenu = this.rootElement.querySelector('.opengridjs-filter-menu');
         if (filterMenu && !filterMenu.contains(e.target) && !e.target.classList.contains('opengridjs-filter-button')) {
             filterMenu.remove();
             document.removeEventListener('click', this.closeFilterMenuOnClickOutside);

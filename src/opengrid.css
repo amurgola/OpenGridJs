@@ -560,7 +560,7 @@
 }
 
 .opengridjs-filter-search-input {
-  width: 100%;
+  width: 90%;
   padding: var(--og-spacing-sm) var(--og-spacing-md);
   border: 1px solid var(--og-border);
   border-radius: var(--og-radius-sm);
