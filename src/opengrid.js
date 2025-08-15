@@ -15,6 +15,8 @@ class OpenGrid {
         this.contextMenuItems = setup.contextMenuOptions;
         this.contextMenuTitle = setup.contextMenuTitle;
         this.loadMoreDataFunction = loadMoreDataFunction;
+        this.columnFilters = {}; // Store active filters for each column
+        this.filteredData = null; // Store filtered data separately
 
         this.rootElement = document.querySelector(`.${className}`);
         this.rootElement.gridInstance = this;
@@ -92,7 +94,7 @@ class OpenGrid {
 
         if(!headerDataOverride) {
             const headers = setup.columnHeaderNames == null
-                ? this.gridColumnNames.map(columnNames => columnNames.headerName)
+                ? (this.gridColumnNames || []).map(columnNames => columnNames.headerName)
                 : setup.columnHeaderNames.map(headerName => headerName.columnName);
 
             const headerData = [];
@@ -128,7 +130,14 @@ class OpenGrid {
             const headerStyle = (header.width.includes('min-width') || header.width.includes('width:')) ? 
                 `${header.width}; flex-grow: 0; flex-shrink: 0;` : 
                 header.width;
-            return `<div class='opengridjs-grid-header-item' draggable="true" data-header='${header.data}' style='${headerStyle}'>${header.headerName}<span class='opengridjs-sort-indicator'></span><span class='opengridjs-resize-handle'></span></div>`;
+            return `<div class='opengridjs-grid-header-item' draggable="true" data-header='${header.data}' style='${headerStyle}'>
+                <span class='opengridjs-header-text'>${header.headerName}</span>
+                <span class='opengridjs-header-actions'>
+                    <span class='opengridjs-filter-button' data-column='${header.data}' title='Filter'>▼</span>
+                    <span class='opengridjs-sort-indicator'></span>
+                </span>
+                <span class='opengridjs-resize-handle'></span>
+            </div>`;
         }).filter(html => html !== '').join('');
 
         const headerItems = Array.from(gridHeader.getElementsByClassName('opengridjs-grid-header-item'));
@@ -288,7 +297,8 @@ class OpenGrid {
 
     rerender() {
         if (this.filteredData) {
-            this.processData(this.filteredData.map(x => x.data));
+            // filteredData is already raw data, not grid data items
+            this.processData(this.filteredData);
         } else {
             this.processData(this.gridData.map(x => x.data));
         }
@@ -382,13 +392,20 @@ class OpenGrid {
     addHeaderActions() {
         const gridHeader = this.rootElement.querySelector(".opengridjs-grid-header");
         gridHeader.addEventListener('click', e => {
+            // Check if click is on filter button
+            if (e.target.classList.contains('opengridjs-filter-button')) {
+                e.stopPropagation();
+                this.toggleFilterMenu(e.target);
+                return;
+            }
+            
             // Check if this click is from a resize operation
             const headerItem = e.target.closest('.opengridjs-grid-header-item');
             if (headerItem && headerItem._wasResizing && headerItem._wasResizing()) {
                 return; // Don't sort if we just finished resizing
             }
             
-            const header = e.target.getAttribute("data-header");
+            const header = e.target.getAttribute("data-header") || e.target.closest('.opengridjs-grid-header-item')?.getAttribute("data-header");
             const headerData = this.headerData.find(x => x.data == header);
 
             if(headerData) {
@@ -408,14 +425,22 @@ class OpenGrid {
                     }
                 });
 
-                this.sortData();
-                this.rerender()
+                // If filters are active, reapply them with sorting
+                if (Object.keys(this.columnFilters).length > 0) {
+                    this.applyAllFilters();
+                } else {
+                    this.sortData();
+                    this.rerender();
+                }
                 this.closeContextMenu()
             }
         });
     }
 
     sortData() {
+        // Only sort if we have a sort state
+        if (!this.sortState.header) return;
+        
         this.gridData.sort((a, b) => {
             a = a.data[this.sortState.header];
             b = b.data[this.sortState.header];
@@ -425,6 +450,12 @@ class OpenGrid {
 
             if (this.sortState.sortDirection == 'asc') return a > b ? 1 : (a < b ? -1 : 0);
             if (this.sortState.sortDirection == 'desc') return a > b ? -1 : (a < b ? 1 : 0);
+        });
+        
+        // Recalculate positions after sorting
+        this.gridData.forEach((item, index) => {
+            item.position = index * this.gridRowPxSize;
+            item.isRendered = false; // Force re-render
         });
     }
     searchFilter(term) {
@@ -568,5 +599,233 @@ class OpenGrid {
 
     stopLoadingMoreData() {
         this.canLoadMoreData = false;
+    }
+
+    toggleFilterMenu(filterButton) {
+        const column = filterButton.getAttribute('data-column');
+        const existingMenu = document.querySelector('.opengridjs-filter-menu');
+        
+        // Close existing menu if clicking the same button
+        if (existingMenu && existingMenu.getAttribute('data-column') === column) {
+            existingMenu.remove();
+            return;
+        }
+        
+        // Close any existing menu
+        if (existingMenu) {
+            existingMenu.remove();
+        }
+        
+        // Create and show new filter menu
+        this.showFilterMenu(filterButton, column);
+    }
+
+    showFilterMenu(filterButton, column) {
+        // Get unique values from the column
+        const uniqueValues = this.getUniqueColumnValues(column);
+        
+        // Get current filter state for this column
+        const currentFilter = this.columnFilters[column] || new Set(uniqueValues);
+        
+        // Create filter menu
+        const filterMenu = document.createElement('div');
+        filterMenu.className = 'opengridjs-filter-menu';
+        filterMenu.setAttribute('data-column', column);
+        
+        // Position the menu below the filter button
+        const buttonRect = filterButton.getBoundingClientRect();
+        const gridRect = this.rootElement.getBoundingClientRect();
+        filterMenu.style.position = 'absolute';
+        filterMenu.style.left = `${buttonRect.left - gridRect.left}px`;
+        filterMenu.style.top = `${buttonRect.bottom - gridRect.top}px`;
+        filterMenu.style.zIndex = '1000';
+        
+        // Build menu content
+        let menuContent = `
+            <div class="opengridjs-filter-menu-header">
+                <button class="opengridjs-filter-select-all">Select All</button>
+                <button class="opengridjs-filter-clear-all">Clear All</button>
+            </div>
+            <div class="opengridjs-filter-search">
+                <input type="text" placeholder="Search..." class="opengridjs-filter-search-input">
+            </div>
+            <div class="opengridjs-filter-options">`;
+        
+        uniqueValues.forEach(value => {
+            const displayValue = value === null || value === undefined || value === '' ? '(Empty)' : value;
+            const isChecked = currentFilter.has(value);
+            menuContent += `
+                <label class="opengridjs-filter-option">
+                    <input type="checkbox" value="${this.escapeHtml(String(value))}" ${isChecked ? 'checked' : ''}>
+                    <span>${this.escapeHtml(String(displayValue))}</span>
+                </label>`;
+        });
+        
+        menuContent += `
+            </div>
+            <div class="opengridjs-filter-menu-footer">
+                <button class="opengridjs-filter-apply">Apply</button>
+                <button class="opengridjs-filter-cancel">Cancel</button>
+            </div>`;
+        
+        filterMenu.innerHTML = menuContent;
+        
+        // Add menu to grid
+        this.rootElement.querySelector('.opengridjs-grid-additional').appendChild(filterMenu);
+        
+        // Add event listeners
+        this.attachFilterMenuEvents(filterMenu, column, uniqueValues);
+        
+        // Close menu when clicking outside
+        setTimeout(() => {
+            document.addEventListener('click', this.closeFilterMenuOnClickOutside);
+        }, 0);
+    }
+
+    attachFilterMenuEvents(filterMenu, column, uniqueValues) {
+        // Select All button
+        filterMenu.querySelector('.opengridjs-filter-select-all').addEventListener('click', () => {
+            filterMenu.querySelectorAll('.opengridjs-filter-option input').forEach(checkbox => {
+                checkbox.checked = true;
+            });
+        });
+        
+        // Clear All button
+        filterMenu.querySelector('.opengridjs-filter-clear-all').addEventListener('click', () => {
+            filterMenu.querySelectorAll('.opengridjs-filter-option input').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+        });
+        
+        // Search functionality
+        const searchInput = filterMenu.querySelector('.opengridjs-filter-search-input');
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            filterMenu.querySelectorAll('.opengridjs-filter-option').forEach(option => {
+                const text = option.querySelector('span').textContent.toLowerCase();
+                option.style.display = text.includes(searchTerm) ? 'flex' : 'none';
+            });
+        });
+        
+        // Apply button
+        filterMenu.querySelector('.opengridjs-filter-apply').addEventListener('click', () => {
+            const selectedValues = new Set();
+            filterMenu.querySelectorAll('.opengridjs-filter-option input:checked').forEach(checkbox => {
+                const value = checkbox.value;
+                // Convert back to original type
+                const originalValue = uniqueValues.find(v => String(v) === value);
+                selectedValues.add(originalValue);
+            });
+            
+            this.applyColumnFilter(column, selectedValues);
+            filterMenu.remove();
+            document.removeEventListener('click', this.closeFilterMenuOnClickOutside);
+        });
+        
+        // Cancel button
+        filterMenu.querySelector('.opengridjs-filter-cancel').addEventListener('click', () => {
+            filterMenu.remove();
+            document.removeEventListener('click', this.closeFilterMenuOnClickOutside);
+        });
+    }
+
+    closeFilterMenuOnClickOutside = (e) => {
+        const filterMenu = document.querySelector('.opengridjs-filter-menu');
+        if (filterMenu && !filterMenu.contains(e.target) && !e.target.classList.contains('opengridjs-filter-button')) {
+            filterMenu.remove();
+            document.removeEventListener('click', this.closeFilterMenuOnClickOutside);
+        }
+    }
+
+    getUniqueColumnValues(column) {
+        const values = new Set();
+        const dataToUse = this.originalData || this.gridData.map(item => item.data);
+        
+        dataToUse.forEach(row => {
+            let value = row[column];
+            values.add(value);
+        });
+        
+        return Array.from(values).sort((a, b) => {
+            if (a === null || a === undefined) return 1;
+            if (b === null || b === undefined) return -1;
+            if (typeof a === 'string' && typeof b === 'string') {
+                return a.localeCompare(b);
+            }
+            return a > b ? 1 : a < b ? -1 : 0;
+        });
+    }
+
+    applyColumnFilter(column, selectedValues) {
+        // Store the filter
+        if (selectedValues.size === this.getUniqueColumnValues(column).length) {
+            // If all values are selected, remove the filter
+            delete this.columnFilters[column];
+        } else {
+            this.columnFilters[column] = selectedValues;
+        }
+        
+        // Apply all filters
+        this.applyAllFilters();
+        
+        // Update visual indicator
+        this.updateFilterIndicators();
+    }
+
+    applyAllFilters() {
+        // Start with original data
+        let filteredData = [...this.originalData];
+        
+        // Apply each column filter
+        Object.keys(this.columnFilters).forEach(column => {
+            const allowedValues = this.columnFilters[column];
+            filteredData = filteredData.filter(row => {
+                return allowedValues.has(row[column]);
+            });
+        });
+        
+        // Store filtered data and rerender
+        this.filteredData = filteredData;
+        this.processData(filteredData);
+        // Sort data after processing if we have an active sort
+        if (this.sortState && this.sortState.header) {
+            this.sortData();
+        }
+        this.rerender();
+    }
+
+    updateFilterIndicators() {
+        // Update filter button appearance for columns with active filters
+        const headerItems = this.rootElement.querySelectorAll('.opengridjs-grid-header-item');
+        headerItems.forEach(headerItem => {
+            const column = headerItem.getAttribute('data-header');
+            const filterButton = headerItem.querySelector('.opengridjs-filter-button');
+            
+            if (filterButton) {
+                if (this.columnFilters[column] && this.columnFilters[column].size > 0) {
+                    filterButton.classList.add('opengridjs-filter-active');
+                } else {
+                    filterButton.classList.remove('opengridjs-filter-active');
+                }
+            }
+        });
+    }
+
+    clearAllFilters() {
+        this.columnFilters = {};
+        this.filteredData = null;
+        this.processData(this.originalData);
+        // Maintain sort if one exists
+        if (this.sortState && this.sortState.header) {
+            this.sortData();
+        }
+        this.rerender();
+        this.updateFilterIndicators();
+    }
+
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 }

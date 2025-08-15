@@ -189,8 +189,8 @@ describe('OpenGrid Comprehensive Testing', () => {
     test('should handle right-click events', () => {
       expect(openGridSource).toContain('contextmenu');
       expect(openGridSource).toContain('preventDefault()');
-      expect(openGridSource).toContain('pageX');
-      expect(openGridSource).toContain('pageY');
+      expect(openGridSource).toContain('clientX');
+      expect(openGridSource).toContain('clientY');
     });
 
     test('should generate dynamic menu HTML', () => {

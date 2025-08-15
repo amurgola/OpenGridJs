@@ -118,7 +118,7 @@
   background-color: var(--og-background);
   border: 1px solid var(--og-border);
   border-radius: var(--og-radius-lg);
-  overflow: hidden;
+  overflow: visible;
   box-shadow: var(--og-shadow);
   transition: var(--og-transition);
   user-select: none;
@@ -142,6 +142,7 @@
   z-index: 10;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+    overflow: hidden;
 }
 
 .opengridjs-grid .opengridjs-grid-header-item {
@@ -463,4 +464,209 @@
     transition: none !important;
     animation: none !important;
   }
+}
+
+/* Filter Button and Header Layout */
+.opengridjs-grid .opengridjs-header-text {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+}
+
+.opengridjs-grid .opengridjs-header-actions {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  gap: 4px;
+}
+
+.opengridjs-grid .opengridjs-filter-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--og-radius-sm);
+  cursor: pointer;
+  font-size: 10px;
+  color: var(--og-text-secondary);
+  transition: var(--og-transition);
+  background-color: transparent;
+  border: 1px solid transparent;
+}
+
+.opengridjs-grid .opengridjs-filter-button:hover {
+  background-color: var(--og-surface);
+  color: var(--og-accent);
+  border-color: var(--og-border);
+}
+
+.opengridjs-grid .opengridjs-filter-button.opengridjs-filter-active {
+  background-color: var(--og-accent);
+  color: white;
+  border-color: var(--og-accent);
+}
+
+.opengridjs-grid .opengridjs-filter-button.opengridjs-filter-active:hover {
+  background-color: var(--og-accent-hover);
+  border-color: var(--og-accent-hover);
+}
+
+/* Filter Menu */
+.opengridjs-filter-menu {
+  background-color: var(--og-context-bg);
+  border: 1px solid var(--og-context-border);
+  border-radius: var(--og-radius-md);
+  box-shadow: var(--og-shadow-hover);
+  min-width: 250px;
+  max-width: 300px;
+  z-index: 1000;
+  animation: fadeIn 0.15s ease-out;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.opengridjs-filter-menu-header {
+  display: flex;
+  gap: var(--og-spacing-sm);
+  padding: var(--og-spacing-md);
+  border-bottom: 1px solid var(--og-border);
+  background-color: var(--og-surface);
+}
+
+.opengridjs-filter-menu-header button {
+  flex: 1;
+  padding: var(--og-spacing-sm) var(--og-spacing-md);
+  border: 1px solid var(--og-border);
+  border-radius: var(--og-radius-sm);
+  background-color: var(--og-background);
+  color: var(--og-text-primary);
+  cursor: pointer;
+  font-size: 12px;
+  font-family: var(--og-font-family);
+  transition: var(--og-transition);
+}
+
+.opengridjs-filter-menu-header button:hover {
+  background-color: var(--og-surface-hover);
+  border-color: var(--og-accent);
+}
+
+.opengridjs-filter-search {
+  padding: var(--og-spacing-md);
+  border-bottom: 1px solid var(--og-border);
+}
+
+.opengridjs-filter-search-input {
+  width: 100%;
+  padding: var(--og-spacing-sm) var(--og-spacing-md);
+  border: 1px solid var(--og-border);
+  border-radius: var(--og-radius-sm);
+  background-color: var(--og-background);
+  color: var(--og-text-primary);
+  font-size: var(--og-font-size);
+  font-family: var(--og-font-family);
+  transition: var(--og-transition);
+}
+
+.opengridjs-filter-search-input:focus {
+  outline: none;
+  border-color: var(--og-accent);
+  box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.1);
+}
+
+.opengridjs-filter-options {
+  max-height: 250px;
+  overflow-y: auto;
+  padding: var(--og-spacing-sm) 0;
+}
+
+.opengridjs-filter-option {
+  display: flex;
+  align-items: center;
+  padding: var(--og-spacing-sm) var(--og-spacing-md);
+  cursor: pointer;
+  transition: var(--og-transition);
+  gap: var(--og-spacing-sm);
+}
+
+.opengridjs-filter-option:hover {
+  background-color: var(--og-surface-hover);
+}
+
+.opengridjs-filter-option input[type="checkbox"] {
+  margin: 0;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--og-accent);
+}
+
+.opengridjs-filter-option span {
+  flex: 1;
+  font-size: var(--og-font-size);
+  color: var(--og-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.opengridjs-filter-menu-footer {
+  display: flex;
+  gap: var(--og-spacing-sm);
+  padding: var(--og-spacing-md);
+  border-top: 1px solid var(--og-border);
+  background-color: var(--og-surface);
+}
+
+.opengridjs-filter-menu-footer button {
+  flex: 1;
+  padding: var(--og-spacing-sm) var(--og-spacing-lg);
+  border-radius: var(--og-radius-sm);
+  cursor: pointer;
+  font-size: var(--og-font-size);
+  font-family: var(--og-font-family);
+  font-weight: var(--og-font-weight-medium);
+  transition: var(--og-transition);
+}
+
+.opengridjs-filter-apply {
+  background-color: var(--og-accent);
+  color: white;
+  border: 1px solid var(--og-accent);
+}
+
+.opengridjs-filter-apply:hover {
+  background-color: var(--og-accent-hover);
+  border-color: var(--og-accent-hover);
+}
+
+.opengridjs-filter-cancel {
+  background-color: var(--og-background);
+  color: var(--og-text-primary);
+  border: 1px solid var(--og-border);
+}
+
+.opengridjs-filter-cancel:hover {
+  background-color: var(--og-surface-hover);
+  border-color: var(--og-accent);
+}
+
+/* Filter menu scrollbar */
+.opengridjs-filter-options::-webkit-scrollbar {
+  width: 6px;
+}
+
+.opengridjs-filter-options::-webkit-scrollbar-track {
+  background: var(--og-scrollbar-track);
+  border-radius: var(--og-radius-sm);
+}
+
+.opengridjs-filter-options::-webkit-scrollbar-thumb {
+  background: var(--og-scrollbar-thumb);
+  border-radius: var(--og-radius-sm);
+}
+
+.opengridjs-filter-options::-webkit-scrollbar-thumb:hover {
+  background: var(--og-scrollbar-thumb-hover);
 }
