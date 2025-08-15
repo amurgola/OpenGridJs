@@ -138,30 +138,30 @@ describe('Multiple Grid Instances and Right-click Features', () => {
         expect(filterMenu.getAttribute('data-column')).toBe(column);
     });
 
-    test('should close filter menu when clicking outside (scoped to grid)', () => {
+    test('should close filter menu when clicking outside (scoped to grid)', (done) => {
         // Open filter menu in grid1
         const grid1FilterButton = container1.querySelector('.opengridjs-filter-button');
         grid1FilterButton.click();
 
-        // Verify menu is open
-        let filterMenus = container1.querySelectorAll('.opengridjs-filter-menu');
-        expect(filterMenus.length).toBe(1);
+        // Wait for event listeners to be attached
+        setTimeout(() => {
+            // Verify menu is open
+            let filterMenus = container1.querySelectorAll('.opengridjs-filter-menu');
+            expect(filterMenus.length).toBe(1);
 
-        // Click outside (on grid2 container)
-        const outsideClickEvent = new MouseEvent('click', {
-            bubbles: true,
-            cancelable: true
-        });
+            // Click outside (on document)
+            const outsideClickEvent = new MouseEvent('click', {
+                bubbles: true,
+                cancelable: true
+            });
 
-        container2.dispatchEvent(outsideClickEvent);
+            document.dispatchEvent(outsideClickEvent);
 
-        // Filter menu should still be open (because click was outside grid1 but not on document)
-        // Let's simulate a document click instead
-        document.dispatchEvent(outsideClickEvent);
-
-        // Filter menu should now be closed
-        filterMenus = container1.querySelectorAll('.opengridjs-filter-menu');
-        expect(filterMenus.length).toBe(0);
+            // Filter menu should now be closed
+            filterMenus = container1.querySelectorAll('.opengridjs-filter-menu');
+            expect(filterMenus.length).toBe(0);
+            done();
+        }, 10);
     });
 
     test('should not interfere between multiple grid operations', () => {

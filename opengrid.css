@@ -468,6 +468,30 @@
   }
 }
 
+/* Drag and Drop Styles */
+.opengridjs-grid .opengridjs-grid-header-item.opengridjs-dragging {
+  opacity: 0.7;
+  background-color: var(--og-accent);
+  color: white;
+  cursor: grabbing;
+  z-index: 1000;
+}
+
+.opengridjs-grid .opengridjs-grid-header-item.opengridjs-drag-over {
+  background-color: var(--og-selected);
+  border-left: 3px solid var(--og-accent);
+  border-right: 3px solid var(--og-accent);
+  transform: scale(1.02);
+}
+
+.opengridjs-grid .opengridjs-grid-header-item[draggable="true"] {
+  cursor: grab;
+}
+
+.opengridjs-grid .opengridjs-grid-header-item[draggable="true"]:active {
+  cursor: grabbing;
+}
+
 /* Filter Button and Header Layout */
 .opengridjs-grid .opengridjs-header-text {
   flex-grow: 1;

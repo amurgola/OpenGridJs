@@ -33,6 +33,12 @@ class OpenGrid {
                 this.generateGridHeader(setup);
                 this.generateGridRows();
                 this.addEventListeners(setup);
+                
+                // Calculate content-based minimum widths and auto-resize after initial render
+                setTimeout(() => {
+                    this.updateColumnWidths();
+                    this.autoResizeColumns();
+                }, 0);
             });
         } else {
             this.originalData = JSON.parse(JSON.stringify(data));
@@ -45,8 +51,11 @@ class OpenGrid {
             this.generateGridRows();
             this.addEventListeners(setup);
             
-            // Calculate content-based minimum widths after initial render
-            setTimeout(() => this.updateColumnWidths(), 0);
+            // Calculate content-based minimum widths and auto-resize after initial render
+            setTimeout(() => {
+                this.updateColumnWidths();
+                this.autoResizeColumns();
+            }, 0);
         }
     } 
 
@@ -150,7 +159,13 @@ class OpenGrid {
             }
 
             headerItem.setAttribute('data-order', headerOrder++);
-            headerItem.addEventListener('dragenter', e => this.dragOver(e));
+            // Add drag and drop event listeners
+            headerItem.addEventListener('dragstart', e => this.handleDragStart(e));
+            headerItem.addEventListener('dragover', e => this.handleDragOver(e));
+            headerItem.addEventListener('dragenter', e => this.handleDragEnter(e));
+            headerItem.addEventListener('dragleave', e => this.handleDragLeave(e));
+            headerItem.addEventListener('drop', e => this.handleDrop(e));
+            headerItem.addEventListener('dragend', e => this.handleDragEnd(e));
             
             const resizeHandle = headerItem.querySelector('.opengridjs-resize-handle');
             if(resizeHandle) {
@@ -159,28 +174,68 @@ class OpenGrid {
         });
     }
 
-    dragOver(e) {
+    handleDragStart(e) {
+        this.draggedColumn = e.target.closest('.opengridjs-grid-header-item');
+        if (!this.draggedColumn) return;
+        
+        this.draggedColumn.classList.add('opengridjs-dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/html', this.draggedColumn.outerHTML);
+    }
+
+    handleDragOver(e) {
         e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+    }
 
-        if(e.relatedTarget && e.relatedTarget.classList.contains('opengridjs-grid-header-item') && !e.target.classList.contains('opengridjs-sort-indicator')) {
-            const relatedTargetOrder = parseInt(e.relatedTarget.getAttribute('data-order'));
-            const currentOrder = parseInt(e.target.getAttribute('data-order'));
-
-            // Validate indices
-            if (isNaN(relatedTargetOrder) || isNaN(currentOrder) || 
-                relatedTargetOrder < 0 || currentOrder < 0 ||
-                relatedTargetOrder >= this.headerData.length || currentOrder >= this.headerData.length ||
-                !this.headerData[relatedTargetOrder] || !this.headerData[currentOrder]) {
-                return;
-            }
-
-            const temp = this.headerData[relatedTargetOrder];
-            this.headerData[relatedTargetOrder] = this.headerData[currentOrder];
-            this.headerData[currentOrder] = temp;
-
-            this.generateGridHeader(null, this.headerData);
-            this.rerender();
+    handleDragEnter(e) {
+        e.preventDefault();
+        const headerItem = e.target.closest('.opengridjs-grid-header-item');
+        if (headerItem && headerItem !== this.draggedColumn) {
+            headerItem.classList.add('opengridjs-drag-over');
         }
+    }
+
+    handleDragLeave(e) {
+        const headerItem = e.target.closest('.opengridjs-grid-header-item');
+        if (headerItem && !headerItem.contains(e.relatedTarget)) {
+            headerItem.classList.remove('opengridjs-drag-over');
+        }
+    }
+
+    handleDrop(e) {
+        e.preventDefault();
+        const dropTarget = e.target.closest('.opengridjs-grid-header-item');
+        
+        if (!dropTarget || !this.draggedColumn || dropTarget === this.draggedColumn) {
+            return;
+        }
+
+        const draggedIndex = parseInt(this.draggedColumn.getAttribute('data-order'));
+        const dropIndex = parseInt(dropTarget.getAttribute('data-order'));
+
+        if (isNaN(draggedIndex) || isNaN(dropIndex) || 
+            draggedIndex < 0 || dropIndex < 0 ||
+            draggedIndex >= this.headerData.length || dropIndex >= this.headerData.length) {
+            return;
+        }
+
+        // Reorder the header data
+        const draggedHeader = this.headerData[draggedIndex];
+        this.headerData.splice(draggedIndex, 1);
+        this.headerData.splice(dropIndex, 0, draggedHeader);
+
+        // Regenerate header and rerender
+        this.generateGridHeader(null, this.headerData);
+        this.rerender();
+    }
+
+    handleDragEnd(e) {
+        // Clean up drag state
+        this.rootElement.querySelectorAll('.opengridjs-grid-header-item').forEach(item => {
+            item.classList.remove('opengridjs-dragging', 'opengridjs-drag-over');
+        });
+        this.draggedColumn = null;
     }
 
     addResizeHandleEvents(resizeHandle, headerItem) {
@@ -889,7 +944,7 @@ class OpenGrid {
 
     closeFilterMenuOnClickOutside = (e) => {
         const filterMenu = this.rootElement.querySelector('.opengridjs-filter-menu');
-        if (filterMenu && !filterMenu.contains(e.target) && !e.target.classList.contains('opengridjs-filter-button')) {
+        if (filterMenu && e.target && !filterMenu.contains(e.target) && !e.target.classList.contains('opengridjs-filter-button')) {
             filterMenu.remove();
             document.removeEventListener('click', this.closeFilterMenuOnClickOutside);
         }
