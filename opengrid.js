@@ -1154,7 +1154,8 @@ class OpenGrid {
 
     closeFilterMenuOnClickOutside = (e) => {
         const filterMenu = this.rootElement.querySelector('.opengridjs-filter-menu');
-        if (filterMenu && e.target && !filterMenu.contains(e.target) && !e.target.classList.contains('opengridjs-filter-button')) {
+        if (filterMenu && e.target && !filterMenu.contains(e.target) &&
+            !(e.target.classList && e.target.classList.contains('opengridjs-filter-button'))) {
             filterMenu.remove();
             document.removeEventListener('click', this.closeFilterMenuOnClickOutside);
         }
@@ -1251,4 +1252,9 @@ class OpenGrid {
         div.textContent = text;
         return div.innerHTML;
     }
+}
+
+// Export for Node.js/Jest (enables test coverage tracking)
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = OpenGrid;
 }
