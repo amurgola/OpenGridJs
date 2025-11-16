@@ -260,12 +260,12 @@ describe('OpenGrid Comprehensive Testing', () => {
     test('should manage grid header interactions', () => {
       expect(openGridSource).toContain('addHeaderActions()');
       expect(openGridSource).toContain('click');
-      expect(openGridSource).toContain('dragOver(');
+      expect(openGridSource).toContain('handleDragOver');
       expect(openGridSource).toContain('preventDefault()');
     });
 
     test('should handle drag and drop', () => {
-      expect(openGridSource).toContain('dragOver(');
+      expect(openGridSource).toContain('handleDragOver');
       expect(openGridSource).toContain('dragenter');
       expect(openGridSource).toContain('draggable="true"');
       expect(openGridSource).toContain('data-header');
