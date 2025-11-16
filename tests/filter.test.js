@@ -2,17 +2,7 @@
  * Tests for the column filtering feature
  */
 
-// Load the OpenGrid JavaScript file
-const fs = require('fs');
-const path = require('path');
-
-// Load OpenGrid class into global scope for Jest
-beforeAll(() => {
-    const openGridSource = fs.readFileSync(path.join(__dirname, '../src/opengrid.js'), 'utf8');
-    // Create a function wrapper and execute it to define OpenGrid globally
-    const wrapper = new Function(openGridSource + '; window.OpenGrid = OpenGrid;');
-    wrapper();
-});
+const OpenGrid = require('../src/opengrid.js');
 
 describe('OpenGrid Column Filtering', () => {
     let container;

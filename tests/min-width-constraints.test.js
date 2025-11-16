@@ -2,16 +2,7 @@
  * Tests for content-based minimum width constraints
  */
 
-// Load the OpenGrid JavaScript file
-const fs = require('fs');
-const path = require('path');
-
-// Load OpenGrid class into global scope for Jest
-beforeAll(() => {
-    const openGridSource = fs.readFileSync(path.join(__dirname, '../src/opengrid.js'), 'utf8');
-    const wrapper = new Function(openGridSource + '; window.OpenGrid = OpenGrid;');
-    wrapper();
-});
+const OpenGrid = require('../src/opengrid.js');
 
 describe('Content-Based Minimum Width Constraints', () => {
     let container;
