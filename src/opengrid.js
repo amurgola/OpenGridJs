@@ -1252,3 +1252,8 @@ class OpenGrid {
         return div.innerHTML;
     }
 }
+
+// Export for Node.js/Jest (enables test coverage tracking)
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = OpenGrid;
+}

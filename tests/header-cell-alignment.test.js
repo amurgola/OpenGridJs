@@ -2,16 +2,7 @@
  * Tests to verify header and cell minimum width alignment
  */
 
-// Load the OpenGrid JavaScript file
-const fs = require('fs');
-const path = require('path');
-
-// Load OpenGrid class into global scope for Jest
-beforeAll(() => {
-    const openGridSource = fs.readFileSync(path.join(__dirname, '../src/opengrid.js'), 'utf8');
-    const wrapper = new Function(openGridSource + '; window.OpenGrid = OpenGrid;');
-    wrapper();
-});
+const OpenGrid = require('../src/opengrid.js');
 
 describe('Header and Cell Minimum Width Alignment', () => {
     let container;
