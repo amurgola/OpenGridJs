@@ -128,6 +128,7 @@ class OpenGrid {
                         headerName: setup.columnHeaderNames[i].columnNameDisplay ?? setup.columnHeaderNames[i].columnName,
                         width: setup.columnHeaderNames[i].columnWidth ? `min-width:${setup.columnHeaderNames[i].columnWidth}` : gridItemWidthStyle,
                         format: setup.columnHeaderNames[i].format,
+                        autoresize: setup.columnHeaderNames[i].autoresize !== false,
                     });
                 }
             }
@@ -465,12 +466,26 @@ class OpenGrid {
         if (!gridHeader) return;
 
         const containerWidth = gridHeader.offsetWidth;
-        const columnCount = this.headerData.length;
-        const equalWidth = Math.floor(containerWidth / columnCount);
 
-        // Reset all columns to equal width
-        this.headerData.forEach((header, index) => {
-            if (header) {
+        // Calculate total fixed width from columns that opt out of autoresize
+        let fixedWidth = 0;
+        let autoResizeCount = 0;
+        this.headerData.forEach(header => {
+            if (header && header.autoresize === false) {
+                const headerEl = gridHeader.querySelector(`[data-header='${header.data}']`);
+                fixedWidth += headerEl ? headerEl.offsetWidth : 0;
+            } else if (header) {
+                autoResizeCount++;
+            }
+        });
+
+        if (autoResizeCount === 0) return;
+
+        const equalWidth = Math.floor((containerWidth - fixedWidth) / autoResizeCount);
+
+        // Only resize columns that allow autoresize
+        this.headerData.forEach(header => {
+            if (header && header.autoresize !== false) {
                 header.width = `width:${equalWidth}px`;
             }
         });

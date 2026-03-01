@@ -113,7 +113,13 @@ const setup = {
             columnName: "name",
             columnNameDisplay: "Full Name",
             columnWidth: "200px", // Optional: specific width
+            autoresize: false, // Optional: prevent auto-resize for this column
             format: (value) => value.toUpperCase() // Optional: custom formatter
+        },
+        {
+            columnName: "email",
+            columnNameDisplay: "Email"
+            // autoresize defaults to true — width adjusts automatically
         }
     ],
     contextMenuTitle: "Actions",
@@ -124,7 +130,7 @@ const setup = {
             className: "edit-action"
         },
         {
-            actionName: "Delete", 
+            actionName: "Delete",
             actionFunctionName: "deleteRow",
             className: "delete-action"
         }
@@ -134,12 +140,13 @@ const setup = {
 
 #### Column Configuration
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `columnName` | string | Data field name |
-| `columnNameDisplay` | string | Display name in header |
-| `columnWidth` | string | CSS width value (e.g., "200px", "20%") |
-| `format` | function | Custom formatting function |
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `columnName` | string | | Data field name |
+| `columnNameDisplay` | string | `columnName` | Display name in header |
+| `columnWidth` | string | | CSS width value (e.g., "200px", "20%") |
+| `autoresize` | boolean | `true` | Whether the column participates in auto-resize. Set to `false` to preserve `columnWidth`. |
+| `format` | function | | Custom formatting function |
 
 #### Context Menu Configuration
 
@@ -205,11 +212,14 @@ const setup = {
 | Method | Parameters | Description |
 |--------|------------|-------------|
 | `appendData(data)` | Array | Add new data to the grid |
+| `updateData(data)` | Array/Function | Replace all grid data (accepts array or async function) |
 | `updateRecordData(data, options)` | Array/Object, Options | Update records by ID with animations |
 | `rerender()` | none | Force grid re-render |
 | `reset()` | none | Reset grid to initial state |
 | `exportToCSV()` | none | Download grid data as CSV |
 | `searchFilter(term)` | string | Filter data by search term |
+| `clearAllFilters()` | none | Remove all column filters |
+| `autoResizeColumns()` | none | Re-distribute column widths (respects `autoresize` setting) |
 | `stopLoadingMoreData()` | none | Disable infinite scrolling |
 
 ### Usage Examples
