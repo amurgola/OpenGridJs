@@ -258,6 +258,9 @@
   min-height: 200px;
   border-bottom-left-radius: var(--og-radius-lg);
   border-bottom-right-radius: var(--og-radius-lg);
+  /* Clip painting (including the scrollbar gutter) to the rounded bottom
+     corners so the scrollbar stays inside the grid's visual boundary. */
+  clip-path: inset(0 round 0 0 var(--og-radius-lg) var(--og-radius-lg));
 }
 
 /* ===========================================================================

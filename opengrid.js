@@ -743,16 +743,26 @@ class OpenGrid {
     getColumnStyle(header) {
         let baseStyle = header.width;
         let minWidthConstraint = '';
-        
+
         // Add content-based minimum width if calculated
         if (header.contentMinWidth) {
             minWidthConstraint = `min-width: ${header.contentMinWidth}px; `;
         }
-        
+
         // Ensure consistent styling between headers and cells
         if (header.width.includes('min-width') || header.width.includes('width:')) {
+            // Pin flex-basis to an explicit pixel size so header and row cells
+            // resolve to the same width. Without this, `flex-basis: auto` uses
+            // max-content per item, and a header with a filter icon + resize
+            // handle ends up wider than the matching narrow cell (e.g. a
+            // numeric column) under the same min-width. Use the larger of the
+            // user-specified column width and the measured content minimum.
+            const pxMatch = header.width.match(/(\d+(?:\.\d+)?)px/);
+            const explicitPx = pxMatch ? parseFloat(pxMatch[1]) : 0;
+            const basisPx = Math.max(explicitPx, header.contentMinWidth || 0);
+            const basisDecl = basisPx > 0 ? `flex-basis: ${basisPx}px; ` : '';
             // Fixed width columns should not grow or shrink, but respect content min-width
-            return `${minWidthConstraint}${baseStyle}; flex-grow: 0; flex-shrink: 0; box-sizing: border-box;`;
+            return `${minWidthConstraint}${baseStyle}; ${basisDecl}flex-grow: 0; flex-shrink: 0; box-sizing: border-box;`;
         } else {
             // Percentage or flex-based columns can grow but still respect content min-width
             return `${minWidthConstraint}${baseStyle}; box-sizing: border-box;`;
