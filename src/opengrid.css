@@ -322,18 +322,23 @@
    Dynamic Row Heights (opt-in via setup.dynamicRowHeight = true)
    =========================================================================== */
 .opengridjs-dynamic-row-height .opengridjs-grid-row {
-  /* Let JS-assigned inline height drive the row; don't let min-height override it. */
+  /* Let JS-assigned inline height drive the row; don't let min-height or the
+     default align-items: center force single-line centered layout. */
   align-items: stretch;
   min-height: 0;
 }
 
 .opengridjs-dynamic-row-height .opengridjs-grid-column-item {
-  /* Stretch cells to fill the row and allow multi-line text to wrap. */
+  /* Switch from flex to block so multi-line text wraps naturally and the cell
+     stretches to match the row height assigned by JS. */
+  display: block;
   height: auto;
+  min-width: 0;
   align-self: stretch;
-  align-items: flex-start;
+  padding: var(--og-spacing-md) var(--og-spacing-lg);
   white-space: normal;
   word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .opengridjs-dynamic-row-height .opengridjs-grid-column-item img {

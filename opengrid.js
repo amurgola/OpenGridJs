@@ -38,15 +38,23 @@ class OpenGrid {
                     this.gridColumnNames = Object.keys(fetchedData[0]).map(key => ({headerName: key, field: key}));
                 }
                 this.initGrid();
-                this.processData(fetchedData);
+                // Header must be generated before processData so that
+                // calculateRowHeights can see the column list and real widths.
                 this.generateGridHeader(setup);
+                this.processData(fetchedData);
                 this.generateGridRows();
                 this.addEventListeners(setup);
-                
+
                 // Calculate content-based minimum widths and auto-resize after initial render
                 setTimeout(() => {
                     this.updateColumnWidths();
                     this.autoResizeColumns();
+                    // For dynamic rows, re-measure once more against the now-
+                    // settled layout even if no column is auto-resizable.
+                    if (this.dynamicRowHeight) {
+                        this.invalidateRowHeightCache();
+                        this.rerender();
+                    }
                 }, 0);
             });
         } else {
@@ -55,18 +63,26 @@ class OpenGrid {
                 this.gridColumnNames = Object.keys(data[0]).map(key => ({headerName: key, field: key}));
             }
             this.initGrid();
-            this.processData(data);
+            // Header must be generated before processData so that
+            // calculateRowHeights can see the column list and real widths.
             this.generateGridHeader(setup);
+            this.processData(data);
             this.generateGridRows();
             this.addEventListeners(setup);
-            
+
             // Calculate content-based minimum widths and auto-resize after initial render
             setTimeout(() => {
                 this.updateColumnWidths();
                 this.autoResizeColumns();
+                // For dynamic rows, re-measure once more against the now-
+                // settled layout even if no column is auto-resizable.
+                if (this.dynamicRowHeight) {
+                    this.invalidateRowHeightCache();
+                    this.rerender();
+                }
             }, 0);
         }
-    } 
+    }
 
     debounce(func, delay) {
         let inDebounce;
@@ -385,16 +401,22 @@ class OpenGrid {
                 }
             }
             
-            // Check a sample of cell contents
-            const sampleSize = Math.min(10, visibleRows.length); // Only check first 10 rows for performance
-            for (let i = 0; i < sampleSize; i++) {
-                const row = visibleRows[i];
-                const cell = row.querySelectorAll('.opengridjs-grid-column-item')[columnIndex];
-                if (cell) {
-                    const cellWidth = this.measureTextWidth(cell.textContent, cell);
-                    // Add same padding as headers (16px each side = 32px total)
-                    const totalCellWidth = cellWidth + 32;
-                    maxContentWidth = Math.max(maxContentWidth, totalCellWidth);
+            // Check a sample of cell contents.
+            // In dynamic-row-height mode the row is *supposed* to grow to fit
+            // wrapped text, so we must NOT pin the column's min width to the
+            // longest single-line text measurement — that would force the
+            // column wide enough for the text to never wrap.
+            if (!this.dynamicRowHeight) {
+                const sampleSize = Math.min(10, visibleRows.length); // Only check first 10 rows for performance
+                for (let i = 0; i < sampleSize; i++) {
+                    const row = visibleRows[i];
+                    const cell = row.querySelectorAll('.opengridjs-grid-column-item')[columnIndex];
+                    if (cell) {
+                        const cellWidth = this.measureTextWidth(cell.textContent, cell);
+                        // Add same padding as headers (16px each side = 32px total)
+                        const totalCellWidth = cellWidth + 32;
+                        maxContentWidth = Math.max(maxContentWidth, totalCellWidth);
+                    }
                 }
             }
             
