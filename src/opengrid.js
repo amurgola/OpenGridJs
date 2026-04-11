@@ -18,6 +18,15 @@ class OpenGrid {
         this.columnFilters = {}; // Store active filters for each column
         this.filteredData = null; // Store filtered data separately
 
+        // Dynamic row height configuration
+        this.dynamicRowHeight = setup.dynamicRowHeight === true;
+        this.rowPadding = typeof setup.rowPadding === 'number' ? setup.rowPadding : 10;
+        this.lineHeightMultiplier = typeof setup.lineHeightMultiplier === 'number' ? setup.lineHeightMultiplier : 1.3;
+        this.totalHeight = 0;
+        this._rowHeightCache = new Map();
+        this._measureCanvas = null;
+        this._measureCtx = null;
+
         this.rootElement = document.querySelector(`.${className}`);
         this.rootElement.gridInstance = this;
         this.rootElement.classList.add('opengridjs-grid');
@@ -79,24 +88,45 @@ class OpenGrid {
 
     initGrid() {
         this.rootElement.classList.add("opengridjs-grid-container");
+        if (this.dynamicRowHeight) {
+            this.rootElement.classList.add("opengridjs-dynamic-row-height");
+        }
         this.rootElement.innerHTML = `
         <div class='opengridjs-grid-additional'></div>
         <div class='opengridjs-grid-header'></div>
         <div class='opengridjs-grid-rows-container'></div>`;
     }
 
+    _getMeasureContext() {
+        if (this._measureCtx) return this._measureCtx;
+        try {
+            this._measureCanvas = document.createElement('canvas');
+            const ctx = this._measureCanvas.getContext('2d');
+            if (ctx) {
+                this._measureCtx = ctx;
+                return ctx;
+            }
+        } catch (e) {
+            // jsdom/test environments may not support canvas
+        }
+        return null;
+    }
+
     processData(data) {
-        this.gridData = data.map((dataItem, currentPosition) => {
+        this.gridData = data.map((dataItem) => {
             if (dataItem.id === undefined || dataItem.id === null || dataItem.id === '') {
                 dataItem.id = this.generateGUID();
             }
             return {
                 data: dataItem,
-                position: currentPosition * this.gridRowPxSize,
+                position: 0,
+                height: this.gridRowPxSize,
                 isRendered: false
             };
         });
         this.sortData();
+        this.calculateRowHeights();
+        this.buildPositionsArray();
         this.createContextMenu(this.contextMenuItems);
     }
 
@@ -285,15 +315,17 @@ class OpenGrid {
 
         const handleMouseUp = () => {
             if (!isResizing) return;
-            
+
             wasResizing = true;
             isResizing = false;
             headerItem.classList.remove('opengridjs-resizing');
             headerItem.setAttribute('draggable', 'true');
-            
+
             document.removeEventListener('mousemove', handleMouseMove);
             document.removeEventListener('mouseup', handleMouseUp);
-            
+
+            // Column width change affects text wrapping — invalidate row height cache.
+            this.invalidateRowHeightCache();
             this.rerender();
             
             // Reset the flag after a short delay to prevent sort trigger
@@ -373,18 +405,15 @@ class OpenGrid {
 
     measureTextWidth(text, element) {
         try {
-            // Create a temporary element to measure text width
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d');
-            
+            const context = this._getMeasureContext();
             if (!context) {
                 throw new Error('Canvas context not available');
             }
-            
+
             // Get computed styles from the element
             const styles = window.getComputedStyle(element);
             context.font = `${styles.fontWeight} ${styles.fontSize} ${styles.fontFamily}`;
-            
+
             // Measure the text
             const metrics = context.measureText(text || '');
             return Math.ceil(metrics.width);
@@ -392,6 +421,243 @@ class OpenGrid {
             // Fallback for environments without canvas support (like JSDOM tests)
             return this.estimateTextWidth(text, element);
         }
+    }
+
+    measureTextHeight(text, font, cellWidth, lineHeight) {
+        const str = text == null ? '' : String(text);
+        if (!str.trim()) return lineHeight;
+
+        const usableWidth = Math.max(20, cellWidth);
+        const ctx = this._getMeasureContext();
+
+        if (!ctx) {
+            // Fallback for environments without canvas: rough char-based estimate.
+            const avgCharWidth = 7;
+            const charsPerLine = Math.max(1, Math.floor(usableWidth / avgCharWidth));
+            // Split on explicit newlines first, then wrap each segment.
+            const segments = str.split(/\r?\n/);
+            let totalLines = 0;
+            for (const seg of segments) {
+                totalLines += Math.max(1, Math.ceil(seg.length / charsPerLine));
+            }
+            return totalLines * lineHeight;
+        }
+
+        ctx.font = font;
+
+        // Honor explicit newlines and wrap each segment independently.
+        const segments = str.split(/\r?\n/);
+        let totalLines = 0;
+        for (const seg of segments) {
+            if (!seg) { totalLines += 1; continue; }
+            // Tokenize keeping whitespace so we approximate CSS overflow-wrap: break-word.
+            const words = seg.split(/\s+/).filter(Boolean);
+            if (words.length === 0) { totalLines += 1; continue; }
+
+            let line = '';
+            let lineCount = 1;
+            for (const word of words) {
+                const candidate = line ? `${line} ${word}` : word;
+                if (ctx.measureText(candidate).width > usableWidth && line) {
+                    lineCount++;
+                    // If a single word is longer than the cell, account for extra line breaks.
+                    if (ctx.measureText(word).width > usableWidth) {
+                        lineCount += Math.max(0, Math.floor(ctx.measureText(word).width / usableWidth));
+                    }
+                    line = word;
+                } else {
+                    line = candidate;
+                }
+            }
+            // Handle a final single unbreakable word wider than the cell.
+            if (line && ctx.measureText(line).width > usableWidth) {
+                lineCount += Math.max(0, Math.floor(ctx.measureText(line).width / usableWidth));
+            }
+            totalLines += lineCount;
+        }
+
+        return totalLines * lineHeight;
+    }
+
+    _getRowFontMetrics() {
+        // Resolve font + line height from a currently rendered cell, falling back
+        // to the header or reasonable defaults. Called from calculateRowHeights.
+        let font = '400 14px -apple-system, BlinkMacSystemFont, sans-serif';
+        let lineHeight = Math.ceil(14 * this.lineHeightMultiplier);
+
+        const sample = this.rootElement.querySelector('.opengridjs-grid-column-item')
+            || this.rootElement.querySelector('.opengridjs-grid-header-item');
+
+        if (sample && typeof window !== 'undefined' && window.getComputedStyle) {
+            try {
+                const styles = window.getComputedStyle(sample);
+                const fontWeight = styles.fontWeight || '400';
+                const fontSize = styles.fontSize || '14px';
+                const fontFamily = styles.fontFamily || 'sans-serif';
+                font = `${fontWeight} ${fontSize} ${fontFamily}`;
+
+                const parsedSize = parseFloat(fontSize);
+                if (!isNaN(parsedSize) && parsedSize > 0) {
+                    lineHeight = Math.ceil(parsedSize * this.lineHeightMultiplier);
+                }
+            } catch (e) {
+                // stick with defaults
+            }
+        }
+        return { font, lineHeight };
+    }
+
+    _getColumnPixelWidths() {
+        // Resolve each column's current rendered width so we know how much room
+        // text has to wrap into. Falls back to evenly distributing the container.
+        const headerEls = this.rootElement.querySelectorAll('.opengridjs-grid-header-item');
+        const widths = [];
+        let anyResolved = false;
+        this.headerData.forEach((_, i) => {
+            const el = headerEls[i];
+            const w = el ? el.offsetWidth : 0;
+            if (w > 0) { anyResolved = true; }
+            widths.push(w);
+        });
+
+        if (!anyResolved) {
+            const container = this.rootElement.querySelector('.opengridjs-grid-header');
+            const containerWidth = (container && container.offsetWidth) || this.rootElement.offsetWidth || 600;
+            const fallback = Math.max(60, Math.floor(containerWidth / Math.max(1, this.headerData.length)));
+            return this.headerData.map(() => fallback);
+        }
+
+        // Fill in zero widths with container-average fallback.
+        const container = this.rootElement.querySelector('.opengridjs-grid-header');
+        const containerWidth = (container && container.offsetWidth) || 600;
+        const fallback = Math.max(60, Math.floor(containerWidth / Math.max(1, this.headerData.length)));
+        return widths.map(w => (w > 0 ? w : fallback));
+    }
+
+    _stripHtml(value) {
+        const str = value == null ? '' : String(value);
+        if (!/<[^>]*>/.test(str)) return str;
+        return str.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+    }
+
+    _resolveCellValue(rowData, field) {
+        if (field == null) return undefined;
+        if (typeof field === 'string' && field.includes('.')) {
+            const keys = field.split('.');
+            let cur = rowData;
+            for (const k of keys) {
+                if (cur == null) return undefined;
+                cur = cur[k];
+            }
+            return cur;
+        }
+        return rowData ? rowData[field] : undefined;
+    }
+
+    calculateRowHeights() {
+        if (!this.dynamicRowHeight) {
+            // Fixed-height mode: every row uses gridRowPxSize.
+            this.gridData.forEach(item => {
+                item.height = this.gridRowPxSize;
+            });
+            return;
+        }
+
+        const columnWidths = this._getColumnPixelWidths();
+        const { font, lineHeight } = this._getRowFontMetrics();
+        // Horizontal padding budget (16px left + 16px right from --og-spacing-lg).
+        const horizontalPadding = 32;
+
+        this.gridData.forEach(item => {
+            const cacheKey = item.data && item.data.id != null ? String(item.data.id) : null;
+            const cached = cacheKey != null ? this._rowHeightCache.get(cacheKey) : null;
+            if (cached != null) {
+                item.height = cached;
+                return;
+            }
+
+            let tallest = 0;
+            this.headerData.forEach((header, colIdx) => {
+                if (!header) return;
+                let value = this._resolveCellValue(item.data, header.data);
+                if (value == null || value === '') return;
+
+                if (header.format && typeof header.format === 'function') {
+                    try { value = header.format(value); } catch (e) { /* fall through */ }
+                }
+
+                const plain = this._stripHtml(value);
+                if (!plain) return;
+
+                const cellWidth = Math.max(20, (columnWidths[colIdx] || 120) - horizontalPadding);
+                const h = this.measureTextHeight(plain, font, cellWidth, lineHeight);
+                if (h > tallest) tallest = h;
+            });
+
+            const computed = Math.max(
+                this.gridRowPxSize,
+                Math.ceil(tallest + this.rowPadding)
+            );
+            item.height = computed;
+            if (cacheKey != null) {
+                this._rowHeightCache.set(cacheKey, computed);
+            }
+        });
+    }
+
+    buildPositionsArray() {
+        let pos = 0;
+        for (let i = 0; i < this.gridData.length; i++) {
+            const item = this.gridData[i];
+            item.position = pos;
+            pos += item.height || this.gridRowPxSize;
+        }
+        this.totalHeight = pos;
+    }
+
+    invalidateRowHeightCache() {
+        if (this._rowHeightCache) {
+            this._rowHeightCache.clear();
+        }
+    }
+
+    findFirstVisibleRowIndex(scrollTop) {
+        const n = this.gridData.length;
+        if (n === 0) return 0;
+        let lo = 0;
+        let hi = n - 1;
+        let result = n;
+        while (lo <= hi) {
+            const mid = (lo + hi) >> 1;
+            const item = this.gridData[mid];
+            const end = item.position + (item.height || this.gridRowPxSize);
+            if (end > scrollTop) {
+                result = mid;
+                hi = mid - 1;
+            } else {
+                lo = mid + 1;
+            }
+        }
+        return result;
+    }
+
+    findLastVisibleRowIndex(viewportBottom) {
+        const n = this.gridData.length;
+        if (n === 0) return -1;
+        let lo = 0;
+        let hi = n - 1;
+        let result = -1;
+        while (lo <= hi) {
+            const mid = (lo + hi) >> 1;
+            const item = this.gridData[mid];
+            if (item.position < viewportBottom) {
+                result = mid;
+                lo = mid + 1;
+            } else {
+                hi = mid - 1;
+            }
+        }
+        return result;
     }
 
     estimateTextWidth(text, element) {
@@ -492,6 +758,8 @@ class OpenGrid {
 
         // Re-render the grid with new column widths
         this.generateGridHeader(null, this.headerData);
+        // Column widths changed — invalidate row height cache so wrapping re-measures.
+        this.invalidateRowHeightCache();
         this.rerender();
     }
 
@@ -501,7 +769,10 @@ class OpenGrid {
         gridRowsContainer.innerHTML = "<div class='opengridjs-grid-rows'></div>";
 
         const gridRows = this.rootElement.querySelector(".opengridjs-grid-rows");
-        gridRows.style.height = `${this.gridRowPxSize * this.gridData.length}px`;
+        // totalHeight is maintained by buildPositionsArray (called from processData).
+        // It equals gridRowPxSize * rowCount in fixed-height mode, so backward-compatible.
+        const containerHeight = this.totalHeight || (this.gridRowPxSize * this.gridData.length);
+        gridRows.style.height = `${containerHeight}px`;
 
         this.renderVisible(gridRowsContainer, gridRows);
     }
@@ -517,30 +788,49 @@ class OpenGrid {
     }
 
     renderVisible(gridRowsContainer, gridRows) {
-        const currentPosition = gridRowsContainer.scrollTop;
-        const visibleItems = this.gridData.filter(data => data.isRendered === false
-            && data.position >= currentPosition
-            && data.position <= currentPosition + this.gridRowPxVisibleArea);
-        const invisibleItems = this.gridData.filter(data => data.isRendered === true
-            && data.position < (currentPosition - (this.gridRowPxSize * 2))
-            || data.position > (currentPosition + this.gridRowPxVisibleArea)
-        );
+        if (!gridRowsContainer || !gridRows) return;
+        if (this.gridData.length === 0) {
+            this.createContextMenu(this.contextMenuItems);
+            return;
+        }
 
-        visibleItems.forEach(rowItem => {
-            this.addRow(gridRows, rowItem);
-        });
+        const scrollTop = gridRowsContainer.scrollTop || 0;
+        const viewportBottom = scrollTop + this.gridRowPxVisibleArea;
 
-        invisibleItems.forEach(rowItem => {
-            this.removeRow(rowItem);
-        });
+        // Binary search over the (variable-height) positions.
+        let firstIdx = this.findFirstVisibleRowIndex(scrollTop);
+        let lastIdx = this.findLastVisibleRowIndex(viewportBottom);
+
+        // Buffer of ~2 rows above and below for smooth scrolling.
+        const buffer = 2;
+        firstIdx = Math.max(0, firstIdx - buffer);
+        lastIdx = Math.min(this.gridData.length - 1, (lastIdx < 0 ? firstIdx : lastIdx) + buffer);
+
+        // Remove previously rendered rows that fell outside the range.
+        for (let i = 0; i < this.gridData.length; i++) {
+            const item = this.gridData[i];
+            if (item.isRendered && (i < firstIdx || i > lastIdx)) {
+                this.removeRow(item);
+            }
+        }
+
+        // Render rows inside the visible range.
+        for (let i = firstIdx; i <= lastIdx; i++) {
+            const item = this.gridData[i];
+            if (!item.isRendered) {
+                this.addRow(gridRows, item);
+            }
+        }
 
         this.createContextMenu(this.contextMenuItems);
     }
 
     addRow(gridRows, rowItem) {
         rowItem.isRendered = true;
+        const rowHeight = rowItem.height || this.gridRowPxSize;
         const rowClassName = `opengridjs-grid-row-${rowItem.position}`;
-        gridRows.innerHTML += `<div data-id='${rowItem.data.id}' class='opengridjs-grid-row ${rowClassName}' style='top:${rowItem.position}px'></div>`;
+        const heightStyle = this.dynamicRowHeight ? `height:${rowHeight}px; ` : '';
+        gridRows.innerHTML += `<div data-id='${rowItem.data.id}' class='opengridjs-grid-row ${rowClassName}' style='${heightStyle}top:${rowItem.position}px'></div>`;
         const gridRow = gridRows.getElementsByClassName(rowClassName)[0];
 
         gridRow.innerHTML = this.headerData.map(header => {
@@ -667,7 +957,7 @@ class OpenGrid {
     sortData() {
         // Only sort if we have a sort state
         if (!this.sortState.header) return;
-        
+
         this.gridData.sort((a, b) => {
             a = a.data[this.sortState.header];
             b = b.data[this.sortState.header];
@@ -678,11 +968,10 @@ class OpenGrid {
             if (this.sortState.sortDirection == 'asc') return a > b ? 1 : (a < b ? -1 : 0);
             if (this.sortState.sortDirection == 'desc') return a > b ? -1 : (a < b ? 1 : 0);
         });
-        
-        // Recalculate positions after sorting
-        this.gridData.forEach((item, index) => {
-            item.position = index * this.gridRowPxSize;
-            item.isRendered = false; // Force re-render
+
+        // Force re-render on next pass; positions are rebuilt by buildPositionsArray.
+        this.gridData.forEach((item) => {
+            item.isRendered = false;
         });
     }
     searchFilter(term) {
@@ -873,6 +1162,7 @@ class OpenGrid {
             newData().then(fetchedData => {
                 if (fetchedData && fetchedData.length > 0) {
                     this.originalData = [...this.originalData, ...fetchedData];
+                    // Keep existing row height cache — appended rows just miss and get measured.
                     this.processData(this.originalData);
                     this.rerender();
                 } else {
@@ -891,6 +1181,8 @@ class OpenGrid {
     }
 
     updateData(newData) {
+        // Full data replacement invalidates all cached row heights.
+        this.invalidateRowHeightCache();
         if (typeof newData === 'function') {
             newData().then(fetchedData => {
                 this.originalData = fetchedData;
@@ -940,6 +1232,12 @@ class OpenGrid {
 
                 // Update the record in original data
                 this.originalData[existingIndex] = { ...oldRecord, ...newRecord };
+
+                // Record content changed — evict this row's cached height so the
+                // next full recalculation re-measures it.
+                if (this._rowHeightCache && newRecord.id != null) {
+                    this._rowHeightCache.delete(String(newRecord.id));
+                }
 
                 // Update in filtered data if it exists
                 if (this.filteredData) {

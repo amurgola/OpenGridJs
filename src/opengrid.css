@@ -318,6 +318,32 @@
   box-sizing: border-box;
 }
 
+/* ===========================================================================
+   Dynamic Row Heights (opt-in via setup.dynamicRowHeight = true)
+   =========================================================================== */
+.opengridjs-dynamic-row-height .opengridjs-grid-row {
+  /* Let JS-assigned inline height drive the row; don't let min-height override it. */
+  align-items: stretch;
+  min-height: 0;
+}
+
+.opengridjs-dynamic-row-height .opengridjs-grid-column-item {
+  /* Stretch cells to fill the row and allow multi-line text to wrap. */
+  height: auto;
+  align-self: stretch;
+  align-items: flex-start;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.opengridjs-dynamic-row-height .opengridjs-grid-column-item img {
+  /* Images scale to the row height, not the other way around. */
+  max-height: calc(100% - 8px);
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+}
+
 .opengridjs-grid-column-item:last-child {
   border-right: none;
 }

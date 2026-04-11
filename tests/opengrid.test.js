@@ -60,10 +60,11 @@ describe('OpenGrid Baseline Tests', () => {
   test('OpenGrid should have virtual scrolling constants', () => {
     const openGridPath = path.join(__dirname, '../src/opengrid.js');
     const content = fs.readFileSync(openGridPath, 'utf8');
-    
+
     // Verify virtual scrolling configuration
     expect(content).toContain('gridRowPxSize = 35');
-    expect(content).toContain('position: currentPosition * this.gridRowPxSize');
+    // Row positions are now built by buildPositionsArray (prefix-sum of per-row heights).
+    expect(content).toContain('buildPositionsArray()');
     expect(content).toContain('isRendered: false');
   });
 
