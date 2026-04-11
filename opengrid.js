@@ -18,10 +18,12 @@ class OpenGrid {
         this.columnFilters = {}; // Store active filters for each column
         this.filteredData = null; // Store filtered data separately
 
-        // Dynamic row height configuration
+        // Dynamic row height configuration. rowPadding represents the total
+        // vertical padding (top + bottom) inside a cell; it must match the CSS
+        // cell padding or rows will have inconsistent top/bottom gaps.
         this.dynamicRowHeight = setup.dynamicRowHeight === true;
-        this.rowPadding = typeof setup.rowPadding === 'number' ? setup.rowPadding : 10;
-        this.lineHeightMultiplier = typeof setup.lineHeightMultiplier === 'number' ? setup.lineHeightMultiplier : 1.3;
+        this.rowPadding = typeof setup.rowPadding === 'number' ? setup.rowPadding : 20;
+        this.lineHeightMultiplier = typeof setup.lineHeightMultiplier === 'number' ? setup.lineHeightMultiplier : 1.5;
         this.totalHeight = 0;
         this._rowHeightCache = new Map();
         this._measureCanvas = null;
@@ -272,8 +274,12 @@ class OpenGrid {
         this.headerData.splice(draggedIndex, 1);
         this.headerData.splice(dropIndex, 0, draggedHeader);
 
-        // Regenerate header and rerender
+        // Regenerate header and rerender. Invalidate the row-height cache so
+        // that the re-measured wrapping lines up with the new column order;
+        // updateColumnWidths re-applies cell styles consistently.
         this.generateGridHeader(null, this.headerData);
+        this.invalidateRowHeightCache();
+        this.updateColumnWidths();
         this.rerender();
     }
 
@@ -316,16 +322,20 @@ class OpenGrid {
 
         const handleMouseMove = (e) => {
             if (!isResizing) return;
-            
+
             const deltaX = e.clientX - startX;
             const minAllowedWidth = this.headerData[headerIndex].contentMinWidth || 80;
             const newWidth = Math.max(minAllowedWidth, startWidth + deltaX);
-            
-            this.headerData[headerIndex].width = `min-width:${newWidth}px`;
+
+            // Use an explicit `width:` so row cells pin to the same value as
+            // the header item — `min-width:` alone lets flex redistribute the
+            // cell width, which makes text wrapping disagree with the header
+            // in dynamic-row-height mode.
+            this.headerData[headerIndex].width = `width:${newWidth}px`;
             headerItem.style.width = `${newWidth}px`;
             headerItem.style.flexGrow = '0';
             headerItem.style.flexShrink = '0';
-            
+
             this.updateColumnWidths();
         };
 

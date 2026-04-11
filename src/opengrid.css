@@ -329,13 +329,16 @@
 }
 
 .opengridjs-dynamic-row-height .opengridjs-grid-column-item {
-  /* Switch from flex to block so multi-line text wraps naturally and the cell
-     stretches to match the row height assigned by JS. */
-  display: block;
+  /* Use flex-direction: column so text wraps within the cell and any slack
+     in the JS-assigned row height is distributed evenly top/bottom. */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  align-self: stretch;
   height: auto;
   min-width: 0;
-  align-self: stretch;
-  padding: var(--og-spacing-md) var(--og-spacing-lg);
+  padding: 10px 16px;
   white-space: normal;
   word-break: break-word;
   overflow-wrap: break-word;
