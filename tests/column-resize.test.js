@@ -68,9 +68,11 @@ describe('OpenGrid Column Resizing', () => {
                 });
                 document.dispatchEvent(mouseMoveEvent);
 
-                // Width should be updated (with minimum constraint)
+                // Width should be updated with an explicit pixel width so
+                // rows pin to the same value as the header — matches the
+                // format used by autoResizeColumns.
                 const headerIndex = parseInt(headerItem.getAttribute('data-order'));
-                expect(grid.headerData[headerIndex].width).toContain('min-width:');
+                expect(grid.headerData[headerIndex].width).toMatch(/^width:\d+px$/);
 
                 done();
             }, 10);

@@ -156,6 +156,38 @@ const setup = {
 | `actionFunctionName` | string | Global function name to call |
 | `className` | string | CSS class for styling |
 
+#### Dynamic Row Heights (opt-in)
+
+By default every row is a fixed 35px tall. Pass `dynamicRowHeight: true` in the
+setup object to size each row to its tallest text cell. `gridRowPxSize` then
+acts as a minimum floor — no row is ever shorter than this value.
+
+```javascript
+const setup = {
+    dynamicRowHeight: true, // opt-in, default: false
+    rowPadding: 10,         // vertical padding per cell, default: 10
+    columnHeaderNames: [
+        { columnName: "title" },
+        { columnName: "description" }
+    ]
+};
+```
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `dynamicRowHeight` | boolean | `false` | When `true`, row heights are measured from text content using `canvas.measureText`. |
+| `rowPadding` | number | `10` | Vertical padding (px) added to each row's measured content height. |
+| `lineHeightMultiplier` | number | `1.3` | Multiplier applied to the computed font size to derive line height. |
+
+**Notes:**
+- Images inside cells scale to fit the row height (`max-height: calc(100% - 8px); width: auto`).
+- If web fonts aren't loaded when the grid is constructed, measurements will be
+  off. Either wait for `document.fonts.ready` before constructing the grid, or
+  call `grid.rerender()` after fonts finish loading.
+- Column resize automatically invalidates the height cache so rows reflow.
+- Fixed-height mode (the default) has zero measurement overhead — existing
+  grids see no behavior change.
+
 ## 🎯 Advanced Usage
 
 ### Asynchronous Data Loading

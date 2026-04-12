@@ -258,6 +258,9 @@
   min-height: 200px;
   border-bottom-left-radius: var(--og-radius-lg);
   border-bottom-right-radius: var(--og-radius-lg);
+  /* Clip painting (including the scrollbar gutter) to the rounded bottom
+     corners so the scrollbar stays inside the grid's visual boundary. */
+  clip-path: inset(0 round 0 0 var(--og-radius-lg) var(--og-radius-lg));
 }
 
 /* ===========================================================================
@@ -316,6 +319,40 @@
   align-items: center;
   height: 2px;
   box-sizing: border-box;
+}
+
+/* ===========================================================================
+   Dynamic Row Heights (opt-in via setup.dynamicRowHeight = true)
+   =========================================================================== */
+.opengridjs-dynamic-row-height .opengridjs-grid-row {
+  /* Let JS-assigned inline height drive the row; don't let min-height or the
+     default align-items: center force single-line centered layout. */
+  align-items: stretch;
+  min-height: 0;
+}
+
+.opengridjs-dynamic-row-height .opengridjs-grid-column-item {
+  /* Use flex-direction: column so text wraps within the cell and any slack
+     in the JS-assigned row height is distributed evenly top/bottom. */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  align-self: stretch;
+  height: auto;
+  min-width: 0;
+  padding: 10px 16px;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.opengridjs-dynamic-row-height .opengridjs-grid-column-item img {
+  /* Images scale to the row height, not the other way around. */
+  max-height: calc(100% - 8px);
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
 }
 
 .opengridjs-grid-column-item:last-child {

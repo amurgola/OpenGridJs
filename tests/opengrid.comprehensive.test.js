@@ -71,8 +71,10 @@ describe('OpenGrid Comprehensive Testing', () => {
 
     test('should have data processing pipeline', () => {
       expect(openGridSource).toContain('processData(data)');
-      expect(openGridSource).toContain('data.map((dataItem, currentPosition)');
-      expect(openGridSource).toContain('currentPosition * this.gridRowPxSize');
+      expect(openGridSource).toContain('data.map((dataItem)');
+      // Dynamic-row-height rewrite: positions are now built via a prefix-sum pass.
+      expect(openGridSource).toContain('buildPositionsArray()');
+      expect(openGridSource).toContain('calculateRowHeights()');
       expect(openGridSource).toContain('isRendered: false');
       expect(openGridSource).toContain('this.sortData()');
     });
@@ -95,7 +97,9 @@ describe('OpenGrid Comprehensive Testing', () => {
   describe('Virtual Scrolling Implementation', () => {
     test('should have virtual scrolling constants and calculations', () => {
       expect(openGridSource).toContain('gridRowPxSize = 35');
-      expect(openGridSource).toContain('position: currentPosition * this.gridRowPxSize');
+      // Positions come from buildPositionsArray() now (prefix sum of row heights).
+      expect(openGridSource).toContain('buildPositionsArray()');
+      expect(openGridSource).toContain('findFirstVisibleRowIndex(');
       expect(openGridSource).toContain('isRendered: false');
       expect(openGridSource).toContain('renderVisible(');
     });
@@ -149,7 +153,8 @@ describe('OpenGrid Comprehensive Testing', () => {
 
     test('should recalculate positions after sorting', () => {
       expect(openGridSource).toContain('sortData()');
-      expect(openGridSource).toContain('currentPosition * this.gridRowPxSize');
+      // Positions are rebuilt via buildPositionsArray after sortData runs in processData.
+      expect(openGridSource).toContain('buildPositionsArray()');
     });
   });
 

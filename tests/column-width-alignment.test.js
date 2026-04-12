@@ -123,21 +123,23 @@ describe('Column Width Alignment', () => {
 
     test('getColumnStyle should return consistent styles', () => {
         const grid = new OpenGrid('test-grid', testData, 400);
-        
-        // Test percentage width
+
+        // Test percentage width (no pixel value → no flex-basis pin)
         const percentHeader = { width: 'width:25%' };
         const percentStyle = grid.getColumnStyle(percentHeader);
         expect(percentStyle).toBe('width:25%; flex-grow: 0; flex-shrink: 0; box-sizing: border-box;');
-        
-        // Test pixel width
+
+        // Test pixel width — now also emits an explicit `flex-basis` so header
+        // and row cells resolve to the same rendered width regardless of
+        // internal content (wider header UI vs narrow numeric cell, etc.).
         const pixelHeader = { width: 'min-width: 200px' };
         const pixelStyle = grid.getColumnStyle(pixelHeader);
-        expect(pixelStyle).toBe('min-width: 200px; flex-grow: 0; flex-shrink: 0; box-sizing: border-box;');
-        
+        expect(pixelStyle).toBe('min-width: 200px; flex-basis: 200px; flex-grow: 0; flex-shrink: 0; box-sizing: border-box;');
+
         // Test width property
         const widthHeader = { width: 'width: 150px' };
         const widthStyle = grid.getColumnStyle(widthHeader);
-        expect(widthStyle).toBe('width: 150px; flex-grow: 0; flex-shrink: 0; box-sizing: border-box;');
+        expect(widthStyle).toBe('width: 150px; flex-basis: 150px; flex-grow: 0; flex-shrink: 0; box-sizing: border-box;');
     });
 
     test('column alignment should work with filters applied', () => {
